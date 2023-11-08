@@ -3,7 +3,7 @@
 
 class LimitSwitcher {
  public:
-  LimitSwitcher();
+  LimitSwitcher(){};
   LimitSwitcher(byte pin) { setPin(pin); }
 
   void setPin(byte pin) {

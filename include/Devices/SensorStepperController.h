@@ -37,6 +37,7 @@ class SensorStepperController {
   StepperState getState() { return _state; }
   StepperPosition getPosition() { return _position; };
 
+  long getX();
   void goToX(long x, long speed = 1000, long acceleration = 200);
   void basePositioning(
       int speed = basePositioningSpeed,
@@ -126,6 +127,10 @@ void SensorStepperController::_hardStop() {
   _stepper.stop();
 
   _setState(StepperState::HOLD);
+}
+
+long SensorStepperController::getX() {
+  return _stepper.getCurrent();
 }
 
 void SensorStepperController::goToX(long x, long speed,
