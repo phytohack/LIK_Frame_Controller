@@ -37,7 +37,8 @@ class SensorStepperController {
   StepperState getState() { return _state; }
   StepperPosition getPosition() { return _position; };
 
-  long getX();
+  void setX(long x) { _stepper.setCurrent(x); }
+  long getX() { return _stepper.getCurrent(); }
   void goToX(long x, long speed = 1000, long acceleration = 200);
   void basePositioning(
       int speed = basePositioningSpeed,
@@ -129,12 +130,7 @@ void SensorStepperController::_hardStop() {
   _setState(StepperState::HOLD);
 }
 
-long SensorStepperController::getX() {
-  return _stepper.getCurrent();
-}
-
-void SensorStepperController::goToX(long x, long speed,
-                                    long acceleration) {
+void SensorStepperController::goToX(long x, long speed, long acceleration) {
   _stepper.getCurrent() < x ? _setState(StepperState::MOVING_FORWARD)
                             : _setState(StepperState::MOVING_BACKWARD);
 
@@ -178,6 +174,7 @@ void SensorStepperController::preciseBasePositioning() {
   }
 
   basePositioning();  // выполнить обычное позиционирование
-  goToX(preciseBasePositioningDistance); // отъехать на небольшое расстояние
-  basePositioning(preciseBasePositioningSpeed); // выполнить позиционирование очень медленно
+  goToX(preciseBasePositioningDistance);  // отъехать на небольшое расстояние
+  basePositioning(preciseBasePositioningSpeed);  // выполнить позиционирование
+                                                 // очень медленно
 }

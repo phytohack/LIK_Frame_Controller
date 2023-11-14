@@ -32,7 +32,7 @@ public:
   void println(String data);
   void println(const __FlashStringHelper *ifsh);
 
-  void debug(const char *message)
+  void debug(String message)
   {
     if (_currentLogLevel >= DEBUG)
       println("[DEBUG] " + String(message));
@@ -44,7 +44,7 @@ public:
       println("[INFO] " + String(message));
   }
 
-  void warn(const char *message)
+  void warn(String message)
   {
     if (_currentLogLevel >= WARN)
       println("[WARN] " + String(message));
