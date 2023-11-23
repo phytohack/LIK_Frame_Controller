@@ -1,10 +1,10 @@
 #pragma once
 #include <Arduino.h>
 
-class LimitSwitcher {
+class LimitSwitcherNoMux {
  public:
-  LimitSwitcher(){};
-  LimitSwitcher(byte pin) { setPin(pin); }
+  LimitSwitcherNoMux(){};
+  LimitSwitcherNoMux(byte pin) { setPin(pin); }
 
   void setPin(byte pin) {
     _pin = pin;
