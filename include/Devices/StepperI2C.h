@@ -126,6 +126,7 @@ void StepperI2C::_handleBaseLimitSwitcherPushing() {
   _updatePosition();
   setCurrent(0);
   _setState(StepperState::HOLD);
+  Serial.println("Base limit switcher pushed");
 }
 
 void StepperI2C::_hardStop() {
@@ -168,6 +169,8 @@ void StepperI2C::goToX(long x, long speed, long acceleration) {
 
   _updatePosition();
   _setState(StepperState::HOLD);
+  Serial.print("Finish moving. Current x: ");
+  Serial.println(getCurrent());
 }
 
 void StepperI2C::basePositioning(int speed, int acc) {

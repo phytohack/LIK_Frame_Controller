@@ -39,7 +39,8 @@
 #define _StepperCore_h
 #include <Arduino.h>
 #include "GStypes.h"
-#include <PCF8575.h>
+// #include <PCF8575.h>
+#include <PCF8574.h>
 
 #ifndef DRIVER_STEP_TIME
 #define DRIVER_STEP_TIME 4
@@ -50,7 +51,8 @@
 template <GS_driverType _DRV, GS_driverType _TYPE = STEPPER_PINS>
 class Stepper {
 public:
-    Stepper(PCF8575* i2c_address, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) {
+    // Stepper(PCF8575* i2c_address, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) {
+    Stepper(PCF8574* i2c_address, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) {
         if (_TYPE == STEPPER_PINS) {
             if (_DRV == STEPPER_I2C) {
 				_i2c_address = i2c_address;
@@ -271,7 +273,8 @@ private:
     volatile uint8_t _bit_mask[_PINS_AMOUNT];
 #else
     uint8_t _pins[_PINS_AMOUNT];
-	PCF8575* _i2c_address;
+	// PCF8575* _i2c_address;
+	PCF8574* _i2c_address;
 #endif
 };
 

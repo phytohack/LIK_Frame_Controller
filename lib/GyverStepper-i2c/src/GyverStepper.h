@@ -184,7 +184,8 @@ void attachPower(handler)
 #include <Arduino.h>
 #include "GStypes.h"
 #include "StepperCore.h"
-#include <PCF8575.h>
+// #include <PCF8575.h>
+#include <PCF8574.h>
 
 // =========== МАКРОСЫ ===========
 #define degPerMinute(x) ((x)/60.0f)
@@ -211,7 +212,8 @@ template <GS_driverType _DRV, GS_driverType _TYPE = STEPPER_PINS>
 class GStepper : public Stepper<_DRV, _TYPE> {
 public:	
     // конструктор
-    GStepper(PCF8575* i2c_address, int stepsPerRev, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) : 
+    // GStepper(PCF8575* i2c_address, int stepsPerRev, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) : 
+    GStepper(PCF8574* i2c_address, int stepsPerRev, uint8_t pin1 = 255, uint8_t pin2 = 255, uint8_t pin3 = 255, uint8_t pin4 = 255, uint8_t pin5 = 255) : 
     Stepper<_DRV, _TYPE> (i2c_address, pin1, pin2, pin3, pin4, pin5) {
         // умолчания
         setMaxSpeed(300);

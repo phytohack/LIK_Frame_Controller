@@ -1,17 +1,21 @@
 #pragma once
-#include <PCF8575.h>
+// #include <PCF8575.h>
+#include <PCF8574.h>
 
 #include "Utilities/Logger.h"
 
-class Multiplexer : public PCF8575 {
+// class Multiplexer : public PCF8575 {
+class Multiplexer : public PCF8574 {
  private:
   int _mode = -1;  // OUTPUT = 0x01, INPUT = 0x00
  public:
-  Multiplexer(byte address, byte sda, byte scl) : PCF8575(address, sda, scl) {
+  // Multiplexer(byte address, byte sda, byte scl) : PCF8575(address, sda, scl) {
+  Multiplexer(byte address, byte sda, byte scl) : PCF8574(address, sda, scl) {
     begin();
   }
   Multiplexer(byte address, byte sda, byte scl, byte mode)
-      : PCF8575(address, sda, scl) {
+      // : PCF8575(address, sda, scl) {
+      : PCF8574(address, sda, scl) {
     begin();
     if (mode == INPUT)
       setupAsInput();
