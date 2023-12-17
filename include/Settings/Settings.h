@@ -1,8 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
-#include "Settings/DeviceSettings.h"
+#include "Settings/MuxSettings.h"
 #include "Settings/WebServerSettings.h"
-#include "Settings/StepperPositionSettings.h"
-#include "Settings/StepperStateSettings.h"
 
+#include "Settings/Steppers/_StepperSettings.h"

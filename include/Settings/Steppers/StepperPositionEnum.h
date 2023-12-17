@@ -1,11 +1,6 @@
 #pragma once
 #include <Arduino.h>
 
-const int basePositioningSpeed = 1000;
-const int preciseBasePositioningSpeed = 200;
-const int basePositioningAcceleration = 200;
-const int preciseBasePositioningDistance = 200;
-
 // ПОЛОЖЕНИЕ СТЕППЕРА
 enum class StepperPosition { BASE,
                              END,
@@ -22,14 +17,13 @@ String StepperPositionName(StepperPosition position) {
 }
 String StepperPositionNameJSON(StepperPosition position) {
   switch (position) {
-    case StepperPosition::BASE: return "Base";
-    case StepperPosition::END: return "End";
-    case StepperPosition::NONBASE: return "Non base";
-    case StepperPosition::UNKNOWN: return "Unwknown";
-    default: return "Invalid";
+    case StepperPosition::BASE: return "base";
+    case StepperPosition::END: return "end";
+    case StepperPosition::NONBASE: return "non_base";
+    case StepperPosition::UNKNOWN: return "unwknown";
+    default: return "invalid";
   }
 }
-
 
 // Коды ответа функции goToXo stepperController-а
 enum class StepperAnswer { OK,

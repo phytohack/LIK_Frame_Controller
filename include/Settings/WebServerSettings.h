@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "Settings/Settings.h"
 
 #ifdef ESP8266
 // Code specific to ESP8266
@@ -13,14 +14,14 @@
 
 
 // разделение на рабочие (там esp32) и домашние настройки (там esp8266)
-#ifdef ESP32
+#ifdef WORK_WIFI
 const char* ssid = "KlimBioTech-LIK";
 const char* password = "U35awfXMT3jnuxQJSMYY";
 IPAddress staticIP(192, 168, 1, 58); // Static IP address you want
 IPAddress gateway(192, 168, 1, 1);     // Gateway of your network
 #endif
 
-#ifdef ESP8266
+#ifdef HOME_WIFI
 const char* ssid = "TP-Link_CFCD";
 const char* password = "87988918";
 IPAddress staticIP(192, 168, 0, 43); // Static IP address you want

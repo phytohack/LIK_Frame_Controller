@@ -5,6 +5,7 @@
 enum class StepperState { HOLD,
                           MOVING_FORWARD,
                           MOVING_BACKWARD };
+                          
 String StepperStateName(StepperState state) {
   switch (state) {
     case StepperState::HOLD: return "HOLD";
@@ -16,10 +17,10 @@ String StepperStateName(StepperState state) {
 
 String StepperStateNameJSON(StepperState state) {
   switch(state) {
-    case StepperState::HOLD: return "Hold";
-    case StepperState::MOVING_FORWARD: return "Moving Forward";
-    case StepperState::MOVING_BACKWARD: return "Moving Backward";
-    default: return "Invalid";
+    case StepperState::HOLD: return "hold";
+    case StepperState::MOVING_FORWARD: return "moving_forward";
+    case StepperState::MOVING_BACKWARD: return "moving_backward";
+    default: return "invalid";
   }
 }
 

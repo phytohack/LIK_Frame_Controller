@@ -3,26 +3,21 @@
 
 // #include "Devices/SensorStepperController.h"
 #include "Settings/Settings.h"
-#include "Utilities/WebServer.h"
+#include "Utilities/WebSocketServerManager.h"
 
 #include "Devices/LowLevel/Multiplexer.h"
 #include "Devices/Abstract/MultiplexerFactory.h"
 #include "Devices/LowLevel/LimitSwitcher.h"
 #include "Devices/StepperI2C.h"
 
-#include "Settings/Settings.h"
-// SensorStepperController *sensorStepper;
+#include "Model/MessageHandler.h"
 
-// const byte stepPin = 23;
-// const byte dirPin = 21;
-// const byte enaPin = 18;
-// const int stepsPerTurn = 800 * 200;  // скорость - шагов на оборот
-// const byte lsPin = 4;
+#include "Settings/Settings.h"
+
 
 void checkMonitor();
-void handleIncomeMessage(String message);
-
-void setup_stepper();
+void setup_steppers();
+// void handleIncomeMessage(int clientNum, String message);
 
 StepperI2C *_thermalCamStepper;
 
@@ -30,13 +25,14 @@ void setup()
 {
   Serial.begin(115200);
 
-  WebSocketManager.setup(ssid, password, staticIP, gateway, subnet, primaryDNS,
+  WebSocketServerManager.setup(ssid, password, staticIP, gateway, subnet, primaryDNS,
                          secondaryDNS);
+  
   // цепочка обязанностей
-  WebSocketManager.setIncomeMessageHandler(
-      handleIncomeMessage); // куда вебсокет отправляет сообщения на обработку
+  WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
 
-  setup_stepper();
+  setup_steppers();
+  MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
 }
 
 long timer = 0;
@@ -49,7 +45,7 @@ void loop()
   }
 
   checkMonitor();
-  WebSocketManager.loop();
+  WebSocketServerManager.loop();
 }
 
 void checkMonitor()
@@ -72,53 +68,75 @@ void checkMonitor()
   }
 }
 
-void handleIncomeMessage(String message)
-{
-  DynamicJsonDocument doc(1024);
-  DeserializationError error = deserializeJson(doc, message);
-  // Check for deserialization errors
-  if (error)
-  {
-    Logger.error("MessageHandler::HandleIncomeMessage -- Failed to parse JSON");
-    return;
-  }
+// void handleIncomeMessage(int clientNum, String message)
+// {
+//   DynamicJsonDocument doc(1024);
+//   DeserializationError error = deserializeJson(doc, message);
+//   // Check for deserialization errors
+//   if (error)
+//   {
+//     Logger.error("MessageHandler::HandleIncomeMessage -- Failed to parse JSON");
+//     return;
+//   }
 
-  const char *command_type = doc["command_type"];
-  if (strcmp(command_type, "go_to_x") == 0)
-  {
-    int x = doc["x"].as<int>();
-    // Check if 'speed' element exists
-    if (doc.containsKey("speed") && !doc["speed"].isNull())
-    {
-      int speed = doc["speed"].as<int>();
-      _thermalCamStepper->goToX(x, speed);
-    }
-    else
-    {
-      _thermalCamStepper->goToX(x);
-    }
-  }
-  else if (strcmp(command_type, "basing") == 0) {
-          _thermalCamStepper->basePositioning();
-  }
-  else if (strcmp(command_type, "precise_basing") == 0) {
-          _thermalCamStepper->preciseBasePositioning();
-  }
-  // else if (strcmp(command_type, "set_x") == 0) {
-  //   int x = doc["x"].as<int>();
-  //   _thermalCamStepper->setX(x);
-  // }
-}
+//   const char *msg_type = doc["msg_type"];
+  
+//   // Сообщение типа "Подключился Я, Главный Контроллер"
+//   // { 
+//   // "msg_type": "identity_response",
+//   // "role": "dispatcher" 
+//   // }
 
-void setup_stepper()
+//   // если подключился main_controller
+//   if (strcmp(msg_type, "identity_responce") == 0) {
+//     if (strcmp(doc["role"], "main_controller") == 0) {
+//       WebSocketServerManager.setMainControllerClientNum(clientNum);
+//     }
+//     return;
+//   }
+
+//   // Сообщение типа "Послать такой-то степпер туда-то"
+//   // {
+//   //  'msg_type': 'stepper_command', 
+//   //  'stepper_name': 'thermal_camera_stepper', 
+//   //  'command_type': 'go_to_x', 
+//   //  'x': '0', 'speed': 1000
+//   // }
+//   const char *command_type = doc["command_type"];
+
+//   if (strcmp(command_type, "go_to_x") == 0)
+//   {
+//     int x = doc["x"].as<int>();
+//     // Check if 'speed' element exists
+//     if (doc.containsKey("speed") && !doc["speed"].isNull())
+//     {
+//       int speed = doc["speed"].as<int>();
+//       _thermalCamStepper->goToX(x, speed);
+//     }
+//     else
+//     {
+//       _thermalCamStepper->goToX(x);
+//     }
+//   }
+//   else if (strcmp(command_type, "basing") == 0) {
+//           _thermalCamStepper->basePositioning();
+//   }
+//   else if (strcmp(command_type, "precise_basing") == 0) {
+//           _thermalCamStepper->preciseBasePositioning();
+//   }
+// }
+
+void setup_steppers()
 {
   _thermalCamStepper = new StepperI2C(
+      DeviceStepper::THERMAL_CAMERA_STEPPER,
       MultiplexerFactory.getMultiplexer(THERMAL_CAMERA_STEPPER_MUX_ADDRESS),
-      THERMAL_CAMERA_STEPPER_STEPS_PER_TURN,
+      StepperStepsPerTurn(DeviceStepper::THERMAL_CAMERA_STEPPER),
       THERMAL_CAMERA_STEPPER_STEP_PIN,
       THERMAL_CAMERA_STEPPER_DIR_PIN,
       THERMAL_CAMERA_STEPPER_ENA_PIN,
       new LimitSwitcher(MultiplexerFactory.getMultiplexer(THERMAL_CAMERA_STEPPER_BASE_LS_MUX_ADDRESS),
                         THERMAL_CAMERA_STEPPER_BASE_LS_PIN)
   );
+  _thermalCamStepper->setPropertiesChangeCallback(MessageHandler.sendStepperPropertiesToMainController);
 }
