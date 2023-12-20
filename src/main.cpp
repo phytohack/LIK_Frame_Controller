@@ -38,11 +38,11 @@ void setup()
 long timer = 0;
 void loop()
 {
-  if (millis() - timer > 1000)
-  {
-    timer = millis();
-    Serial.println('.');
-  }
+  // if (millis() - timer > 1000)
+  // {
+  //   timer = millis();
+  //   Serial.println('.');
+  // }
 
   checkMonitor();
   WebSocketServerManager.loop();

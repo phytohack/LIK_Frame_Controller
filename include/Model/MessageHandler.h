@@ -67,7 +67,8 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
       } else {
         status = "error";
       }
-      if (msg.requiredResponce) getInstance().sendCommandResponce(msg.msgId, status);
+      // if (msg.requiredResponce) getInstance().sendCommandResponce(msg.msgId, status);
+      getInstance().sendCommandResponce(msg.msgId, status);
     }
   }
 
@@ -84,11 +85,10 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
 
 Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
   StepperI2C *stepper = nullptr;
-  
   // выбор степпера
-  if (msg.jsonDoc["device_name"] == StepperDeviceNameJSON(DeviceStepper::THERMAL_CAMERA_STEPPER))
-    StepperI2C *stepper = getInstance().thermalCamStepper;
-
+  if (msg.jsonDoc["device_name"] == StepperDeviceNameJSON(DeviceStepper::THERMAL_CAMERA_STEPPER)) {
+    stepper = getInstance().thermalCamStepper;
+  }
   // выбор команды
   if (msg.jsonDoc["command"] == StepperCommandTypeJSON(StepperCommandType::GO_TO_X)) {
     int x = msg.jsonDoc["x"].as<int>();

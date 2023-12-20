@@ -61,6 +61,9 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
   void basePositioning(int speed, int acceleration);
   void preciseBasePositioning();
 
+  //int convertFromXToCm(int x);
+  //int convertFromCmToX(int cm);
+
  private:
   LimitSwitcher* _baseLimitSwitcher = nullptr;
 
@@ -103,8 +106,9 @@ void StepperI2C::_updatePosition() {
 
 void StepperI2C::_setState(StepperState state) {
   _state = state;
-
-  if (_propertiesChangeCallback) _propertiesChangeCallback(this);
+  if (_propertiesChangeCallback) {
+    _propertiesChangeCallback(this);
+  }
   // if (_stateChangeCallback) _stateChangeCallback(*this);
   // // если приехали куда-то - то послать еще и новую координату
   // if (_coordinateChangeCallback && _state == StepperState::HOLD)
@@ -167,9 +171,11 @@ void StepperI2C::goToX(long x, long speed) {
 
 void StepperI2C::goToX(long x, long speed, long acceleration) {
   // определить направление
-  getCurrent() < x ? _setState(StepperState::MOVING_FORWARD)
+  int curr = getCurrent();
+  curr < x ? _setState(StepperState::MOVING_FORWARD)
                    : _setState(StepperState::MOVING_BACKWARD);
 
+  
   setRunMode(FOLLOW_POS);  // режим
   setMaxSpeed(speed);      // скорость движения к цели
   // setSpeed(speed);      // скорость движения к цели

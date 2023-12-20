@@ -85,6 +85,10 @@ void WebSocketServerManager_::setIncomeMessageHandler(
 void WebSocketServerManager_::loop() { webSocket.loop(); }
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {
+  Logger.debug("SENDING MESSAGE");
+  Logger.debug("-----------------------");
+  Logger.debug(msg);
+  Logger.debug("-----------------------");
   webSocket.sendTXT(num, msg);
 }
 
