@@ -88,7 +88,7 @@ void checkMonitor()
 //   // }
 
 //   // если подключился main_controller
-//   if (strcmp(msg_type, "identity_responce") == 0) {
+//   if (strcmp(msg_type, "identity_response") == 0) {
 //     if (strcmp(doc["role"], "main_controller") == 0) {
 //       WebSocketServerManager.setMainControllerClientNum(clientNum);
 //     }

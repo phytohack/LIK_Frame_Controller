@@ -35,7 +35,7 @@ class MessageHandler_ {
   static void handleIncomeMessageToServer(int clientNum, String response);
 
   // Исходящие
-  void sendCommandResponce(int requestMsgId, String status);
+  void sendCommandResponse(int requestMsgId, bool status);
   static void sendStepperPropertiesToMainController(StepperI2C *stepper);
 
   Command *createStepperCommand(IncomeMessage msg);
@@ -50,7 +50,7 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
 
   IncomeMessage msg = IncomeMessage(strMsg);
 
-  if (msg.msgType == IncomeMsgTypeValue::IDENTITY_RESPONCE) {
+  if (msg.msgType == IncomeMsgTypeValue::IDENTITY_RESPONSE) {
     if (msg.jsonDoc['role'] == "main_controller")
       WebSocketServerManager.setMainControllerClientNum(clientNum);
   }
@@ -58,17 +58,13 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
   else if (msg.msgType == IncomeMsgTypeValue::DEVICE_COMMAND) {
     if (msg.jsonDoc["device_type"] == "stepper") {
       Command *command = getInstance().createStepperCommand(msg);
-      String status = "";
+      bool status = false;
       if (command) {
         command->execute();
         delete command;
-        status = "success";
-
-      } else {
-        status = "error";
+        status = true;
       }
-      // if (msg.requiredResponce) getInstance().sendCommandResponce(msg.msgId, status);
-      getInstance().sendCommandResponce(msg.msgId, status);
+      getInstance().sendCommandResponse(msg.msgId, status);
     }
   }
 
@@ -120,10 +116,10 @@ void MessageHandler_::sendStepperPropertiesToMainController(
   WebSocketServerManager.sendToMainController(msg.getMessage());
 }
 
-void MessageHandler_::sendCommandResponce(int requestMsgId, String status) {
+void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
   OutcomeMessage msg = OutcomeMessage();
   msg.addField("request_msg_id", String(requestMsgId));
-  msg.addField("msg_type", "device_command_responce");
+  msg.addField("msg_type", "device_command_response");
   msg.addField("status", status);
   WebSocketServerManager.sendToMainController(msg.getMessage());
 }

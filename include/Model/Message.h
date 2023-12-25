@@ -5,7 +5,7 @@
 #include "Settings/MessageProtocol.h"
 #include "Utilities/Logger.h"
 
-// enum class IncomeMessageType { IDENTITY_RESPONCE, COMMAND, UNKNOWN };
+// enum class IncomeMessageType { IDENTITY_RESPONSE, COMMAND, UNKNOWN };
 
 class IncomeMessage {
  public:
@@ -15,7 +15,7 @@ class IncomeMessage {
 
   uint8_t msgId;
   IncomeMsgTypeValue msgType = IncomeMsgTypeValue::UNKNOWN;
-  bool requiredResponce = false;
+  bool requiredResponse = false;
 };
 
 IncomeMessage::IncomeMessage(String msg) : jsonDoc(1024) {
@@ -29,11 +29,11 @@ IncomeMessage::IncomeMessage(String msg) : jsonDoc(1024) {
   msgType = JSON2IncomeMessageType(jsonDoc["msg_type"]);
   msgId = jsonDoc["msg_id"];
 
-  if (jsonDoc.containsKey("required_responce") &&
-      !jsonDoc["required_responce"].isNull()) {
-    bool requiredResponce = jsonDoc["required_responce"].as<bool>();
-    Logger.print("Required Responce exists and equal: ");
-    Logger.println(String(requiredResponce));
+  if (jsonDoc.containsKey("required_response") &&
+      !jsonDoc["required_response"].isNull()) {
+    bool requiredResponse = jsonDoc["required_response"].as<bool>();
+    Logger.print("Required Response exists and equal: ");
+    Logger.println(String(requiredResponse));
   }
 };
 
@@ -45,6 +45,7 @@ class OutcomeMessage {
 
   void addField(String field, String value);
   void addField(String field, int value);
+  void addField(String field, bool value);
   String getMessage();
 
  private:
@@ -63,6 +64,15 @@ void OutcomeMessage::addField(String field, int value) {
   _msg += "\"";
   _msg += ":";
   _msg += String(value);
+  _msg += ",";
+}
+
+void OutcomeMessage::addField(String field, bool value) {
+  _msg += "\"";
+  _msg += field;
+  _msg += "\"";
+  _msg += ":";
+  _msg += value ? "true" : "false";
   _msg += ",";
 }
 

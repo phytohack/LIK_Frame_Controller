@@ -9,7 +9,7 @@ class Command {
   virtual ~Command() {}
   virtual void execute() = 0;
 
-  bool responce_required;
+  bool response_required;
 };
 
 class StepperCommand : public Command {

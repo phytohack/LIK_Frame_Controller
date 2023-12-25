@@ -8,14 +8,14 @@
 // 3) enumNameJSON Function
 // 4) JSON2enum Function
 
-enum class IncomeMsgTypeValue { IDENTITY_RESPONCE, DEVICE_COMMAND, DEVICE_STATE_REQUEST, UNKNOWN };
+enum class IncomeMsgTypeValue { IDENTITY_RESPONSE, DEVICE_COMMAND, DEVICE_STATE_REQUEST, UNKNOWN };
 
 String IncomeMessageTypeName(IncomeMsgTypeValue type) {};
 
 String IncomeMessageTypeNameJSON(IncomeMsgTypeValue type) {
   switch (type) {
-    case IncomeMsgTypeValue::IDENTITY_RESPONCE:
-      return "identity_responce";
+    case IncomeMsgTypeValue::IDENTITY_RESPONSE:
+      return "identity_response";
     case IncomeMsgTypeValue::DEVICE_COMMAND:
       return "device_command";
     case IncomeMsgTypeValue::DEVICE_STATE_REQUEST:
@@ -27,8 +27,8 @@ String IncomeMessageTypeNameJSON(IncomeMsgTypeValue type) {
 
 IncomeMsgTypeValue JSON2IncomeMessageType(String value) {
   if (value ==
-      IncomeMessageTypeNameJSON(IncomeMsgTypeValue::IDENTITY_RESPONCE)) {
-    return IncomeMsgTypeValue::IDENTITY_RESPONCE;
+      IncomeMessageTypeNameJSON(IncomeMsgTypeValue::IDENTITY_RESPONSE)) {
+    return IncomeMsgTypeValue::IDENTITY_RESPONSE;
   } else if (value == IncomeMessageTypeNameJSON(IncomeMsgTypeValue::DEVICE_COMMAND)) {
     return IncomeMsgTypeValue::DEVICE_COMMAND;
   } else if (value == IncomeMessageTypeNameJSON(IncomeMsgTypeValue::DEVICE_STATE_REQUEST)) {
