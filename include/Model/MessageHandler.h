@@ -43,16 +43,19 @@ class MessageHandler_ {
 };
 
 void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) {
-  Logger.debug("MessageHandler::HandleIncomeMessage GET MESSAGE:");
-  Logger.debug("--------------");
+  Logger.debug("");
+  Logger.debug("--- >>> INCOME MESSAGE");
+  Logger.debug("----------------------------");
   Logger.debug(strMsg);
-  Logger.debug("--------------");
+  Logger.debug("----------------------------");
 
   IncomeMessage msg = IncomeMessage(strMsg);
 
   if (msg.msgType == IncomeMsgTypeValue::IDENTITY_RESPONSE) {
-    if (msg.jsonDoc['role'] == "main_controller")
+    if (msg.jsonDoc["role"] == "main_controller") {
+      Logger.debug("Get identity request with role == main_controller");
       WebSocketServerManager.setMainControllerClientNum(clientNum);
+    }
   }
 
   else if (msg.msgType == IncomeMsgTypeValue::DEVICE_COMMAND) {
@@ -108,7 +111,7 @@ Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
 void MessageHandler_::sendStepperPropertiesToMainController(
     StepperI2C *stepper) {
   OutcomeMessage msg = OutcomeMessage();
-  msg.addField("msg_type", "device_state");
+  msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_STATE));
   msg.addField("device_name", StepperDeviceNameJSON(stepper->deviceStepper));
   msg.addField("state", StepperStateNameJSON(stepper->getState()));
   msg.addField("abs_position", StepperPositionNameJSON(stepper->getPosition()));
@@ -119,7 +122,7 @@ void MessageHandler_::sendStepperPropertiesToMainController(
 void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
   OutcomeMessage msg = OutcomeMessage();
   msg.addField("request_msg_id", String(requestMsgId));
-  msg.addField("msg_type", "device_command_response");
+  msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONCE));
   msg.addField("status", status);
   WebSocketServerManager.sendToMainController(msg.getMessage());
 }

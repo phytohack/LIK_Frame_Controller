@@ -10,6 +10,7 @@
 
 enum class IncomeMsgTypeValue { IDENTITY_RESPONSE, DEVICE_COMMAND, DEVICE_STATE_REQUEST, UNKNOWN };
 
+
 String IncomeMessageTypeName(IncomeMsgTypeValue type) {};
 
 String IncomeMessageTypeNameJSON(IncomeMsgTypeValue type) {
@@ -35,5 +36,18 @@ IncomeMsgTypeValue JSON2IncomeMessageType(String value) {
     return IncomeMsgTypeValue::DEVICE_STATE_REQUEST;
   } else {
     return IncomeMsgTypeValue::UNKNOWN;
+  }
+};
+
+enum class OutcomeMsgTypeValue { DEVICE_STATE, DEVICE_COMMAND_RESPONCE, UNKNOWN };
+
+String OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue type) {
+  switch (type) {
+    case OutcomeMsgTypeValue::DEVICE_STATE:
+      return "device_state";
+    case OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONCE:
+      return "device_command_responce";
+    default:
+      return "unknown";
   }
 };

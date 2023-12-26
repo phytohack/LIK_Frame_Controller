@@ -40,6 +40,8 @@ class WebSocketServerManager_ {
   void send(uint8_t clientNum, String msg);
   void sendToMainController(String msg);
 
+  void printMainControllerConnectionState();
+
  private:
   WebSocketServerManager_() : webSocket(81){};
 
@@ -72,6 +74,15 @@ void WebSocketServerManager_::setup(String ssid, String pass,
   webSocket.onEvent(webSocketEvent);
 }
 
+void WebSocketServerManager_::printMainControllerConnectionState() {
+  if (  getInstance().mainControllerClientNum == -1) {
+    Logger.println("! -- MAIN CONTROLLER NOT CONNECTED -- !");
+  } else {
+    Serial.print("! -- MAIN CONTROLLER CONNECTED WITH NUM: ");
+    Serial.println(getInstance().mainControllerClientNum);
+  }
+}
+
 void WebSocketServerManager_::setMainControllerClientNum(int num) {
   getInstance().mainControllerClientNum = num;
   Logger.debug("MainController connected!");
@@ -85,16 +96,18 @@ void WebSocketServerManager_::setIncomeMessageHandler(
 void WebSocketServerManager_::loop() { webSocket.loop(); }
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {
-  Logger.debug("SENDING MESSAGE");
-  Logger.debug("-----------------------");
+  Logger.debug("");
+  Logger.debug("OUTCOME MESSAGE   --- >>>");
+  Logger.debug("----------------------------");
   Logger.debug(msg);
-  Logger.debug("-----------------------");
+  Logger.debug("----------------------------");
   webSocket.sendTXT(num, msg);
 }
 
 void WebSocketServerManager_::sendToMainController(String msg) {
-  if (getInstance().mainControllerClientNum != -1)
+  if (getInstance().mainControllerClientNum != -1) {
     getInstance().send(getInstance().mainControllerClientNum, msg);
+  }
 }
 
 void WebSocketServerManager_::webSocketEvent(uint8_t num, WStype_t type,
@@ -116,7 +129,7 @@ void WebSocketServerManager_::webSocketEvent(uint8_t num, WStype_t type,
       break;
     }
     case WStype_TEXT:
-      Serial.printf("[%u] Received: %s\n", num, payload);
+      //Serial.printf("[%u] Received: %s\n", num, payload);
       if (getInstance().incomeMessageHandler)
         getInstance().incomeMessageHandler(num, String((char *)payload));
       break;

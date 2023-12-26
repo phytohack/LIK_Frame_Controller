@@ -269,8 +269,6 @@ public:
     
     // чтение текущей позиции в шагах
     long getCurrent() {
-        Serial.println("Reading pos");
-        Serial.println(pos);
         return pos;
     }
     
