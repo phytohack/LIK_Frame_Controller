@@ -46,7 +46,11 @@ class OutcomeMessage {
   void addField(String field, String value);
   void addField(String field, int value);
   void addField(String field, bool value);
-  String getMessage();
+  String wrapMessage();
+
+  operator String() {
+    return wrapMessage();
+  }
 
  private:
   String _msg = "";
@@ -87,7 +91,7 @@ void OutcomeMessage::addField(String field, String value) {
   _msg += ",";
 };
 
-String OutcomeMessage::getMessage() {
+String OutcomeMessage::wrapMessage() {
   if (!_msg.isEmpty() && _msg[_msg.length() - 1] == ',') {
     _msg.remove(_msg.length() - 1);  // Remove the trailing comma
   }

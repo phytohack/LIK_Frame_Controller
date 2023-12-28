@@ -116,7 +116,7 @@ void MessageHandler_::sendStepperPropertiesToMainController(
   msg.addField("state", StepperStateNameJSON(stepper->getState()));
   msg.addField("abs_position", StepperPositionNameJSON(stepper->getPosition()));
   msg.addField("x", String(stepper->getCoordinate()));
-  WebSocketServerManager.sendToMainController(msg.getMessage());
+  WebSocketServerManager.sendToMainController(msg);
 }
 
 void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
@@ -124,7 +124,7 @@ void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
   msg.addField("request_msg_id", String(requestMsgId));
   msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONCE));
   msg.addField("status", status);
-  WebSocketServerManager.sendToMainController(msg.getMessage());
+  WebSocketServerManager.sendToMainController(msg);
 }
 
 // --------- SINGLETON -----------
