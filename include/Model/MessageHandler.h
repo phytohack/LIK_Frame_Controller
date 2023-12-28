@@ -55,6 +55,8 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
     if (msg.jsonDoc["role"] == "main_controller") {
       Logger.debug("Get identity request with role == main_controller");
       WebSocketServerManager.setMainControllerClientNum(clientNum);
+      getInstance().sendStepperPropertiesToMainController(
+          getInstance().thermalCamStepper);
     }
   }
 
@@ -112,6 +114,7 @@ void MessageHandler_::sendStepperPropertiesToMainController(
     StepperI2C *stepper) {
   OutcomeMessage msg = OutcomeMessage();
   msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_STATE));
+  msg.addField("device_type", String("stepper"));
   msg.addField("device_name", StepperDeviceNameJSON(stepper->deviceStepper));
   msg.addField("state", StepperStateNameJSON(stepper->getState()));
   msg.addField("abs_position", StepperPositionNameJSON(stepper->getPosition()));

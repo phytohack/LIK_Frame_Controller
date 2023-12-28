@@ -29,6 +29,7 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
              LimitSwitcher* baseLimitSwitcher)
       : StepperI2C(deviceStepper, mux, stepsPerTurn, stepPin, dirPin, enaPin) {
     _baseLimitSwitcher = baseLimitSwitcher;
+    delay(12);
     if (_baseLimitSwitcher->isPushed()) _setPosition(StepperPosition::BASE);
   };
 
