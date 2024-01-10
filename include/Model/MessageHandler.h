@@ -95,19 +95,19 @@ Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
     int x = msg.jsonDoc["x"].as<int>();
     if (msg.jsonDoc.containsKey("speed") && !msg.jsonDoc["speed"].isNull()) {
       int speed = msg.jsonDoc["speed"].as<int>();
-      return new StepperGoToXCommand(stepper, x, speed);
+      return new FrameStepperGoToXCommand(stepper, x, speed);
     } else
-      return new StepperGoToXCommand(stepper, x);
+      return new FrameStepperGoToXCommand(stepper, x);
   }
 
   if (msg.jsonDoc["command"] == StepperCommandTypeJSON(StepperCommandType::BASING))
-    return new StepperBasingCommand(stepper);
+    return new FrameStepperBasingCommand(stepper);
 
   if (msg.jsonDoc["command"] == StepperCommandTypeJSON(StepperCommandType::PRECISE_BASING))
-    return new StepperPreciseBasingCommand(stepper);
+    return new FrameStepperPreciseBasingCommand(stepper);
   
   if (msg.jsonDoc["command"] == StepperCommandTypeJSON(StepperCommandType::STOP))
-    return new StepperStopCommand(stepper);
+    return new FrameStepperStopCommand(stepper);
 }
 
 void MessageHandler_::sendStepperPropertiesToMainController(

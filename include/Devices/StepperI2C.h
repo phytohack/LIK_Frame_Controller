@@ -10,10 +10,6 @@
 class StepperI2C : public GStepper<STEPPER_I2C> {
   using PropertiesChangeCallback = std::function<void(StepperI2C*)>;
 
-  // using StateChangeCallback = std::function<void(StepperI2C&)>;
-  // using PositionChangeCallback = std::function<void(StepperPosition)>;
-  // using CoordinateChangeCallback = std::function<void(long)>;
-
  public:
   // без концевика
   StepperI2C(DeviceStepper deviceStepper, Multiplexer* mux, int stepsPerTurn,
@@ -35,17 +31,6 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
 
   // за какой девайс отвечает шаговик (Settings/Steppers/StepperDeviceEnum.h)
   DeviceStepper deviceStepper;
-
-  // void setStateChangeCallback(StateChangeCallback callback) {
-  //   _stateChangeCallback = callback;
-  // }
-  // void setPositionChangeCallback(PositionChangeCallback callback) {
-  //   _positionChangeCallback = callback;
-  // }
-
-  // void setCoordinateChangeCallback(CoordinateChangeCallback callback) {
-  //   _coordinateChangeCallback = callback;
-  // }
 
   void setPropertiesChangeCallback(PropertiesChangeCallback callback) {
     _propertiesChangeCallback = callback;
@@ -69,14 +54,12 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
   LimitSwitcher* _baseLimitSwitcher = nullptr;
 
   StepperState _state = StepperState::HOLD;
-  // StateChangeCallback _stateChangeCallback;
-  // PositionChangeCallback _positionChangeCallback;
-  // CoordinateChangeCallback _coordinateChangeCallback;
-
-  PropertiesChangeCallback
-      _propertiesChangeCallback;  // все вместе - state, position, x
-
   StepperPosition _position = StepperPosition::UNKNOWN;
+
+  // если уже делали preciseBasing - то следом не нужно делать basing() или preciseBasing()
+  bool _preciseBased = false;
+  
+  PropertiesChangeCallback _propertiesChangeCallback;  // все вместе - state, position, x
 
   void _setState(StepperState state);
   void _setPosition(StepperPosition pos);
@@ -110,18 +93,11 @@ void StepperI2C::_setState(StepperState state) {
   if (_propertiesChangeCallback) {
     _propertiesChangeCallback(this);
   }
-  // if (_stateChangeCallback) _stateChangeCallback(*this);
-  // // если приехали куда-то - то послать еще и новую координату
-  // if (_coordinateChangeCallback && _state == StepperState::HOLD)
-  //   _coordinateChangeCallback(getCurrent());
 }
 
 void StepperI2C::_setPosition(StepperPosition position) {
   _position = position;
-
   if (_propertiesChangeCallback) _propertiesChangeCallback(this);
-  // if (_positionChangeCallback) _positionChangeCallback(*this);
-  // if (_positionChangeCallback) _positionChangeCallback(position);
 }
 
 // "Мягкая" остановка c заданным ускорением
@@ -201,6 +177,8 @@ void StepperI2C::goToX(long x, long speed, long acceleration) {
 
   _updatePosition();
   _setState(StepperState::HOLD);
+  
+  _preciseBased = false;
 }
 
 void StepperI2C::basePositioning() {
@@ -210,6 +188,11 @@ void StepperI2C::basePositioning() {
 }
 
 void StepperI2C::basePositioning(int speed, int acc) {
+  if (_preciseBased) {
+    Logger.debug("No need to Basing - already precise based");
+    return;
+  }
+  
   if (_baseLimitSwitcher == nullptr) {
     Logger.warn("Base Positioning Imposible. Base Limit Switcher Not Set");
     return;
@@ -230,9 +213,16 @@ void StepperI2C::basePositioning(int speed, int acc) {
       }
     }
   }
+
+  _preciseBased = false;
 }
 
 void StepperI2C::preciseBasePositioning() {
+  if (_preciseBased) {
+    Logger.debug("No need to Precise Basing - already precise based");
+    return;
+  }
+  
   if (_baseLimitSwitcher == nullptr) {
     Logger.warn("Base Positioning Imposible. Base Limit Switcher Not Set");
     return;
@@ -246,4 +236,6 @@ void StepperI2C::preciseBasePositioning() {
   
   goToX(distance);  // отъехать на небольшое расстояние
   basePositioning(speed, acc);  // выполнить позиционирование очень медленно
+
+  _preciseBased = true;
 }

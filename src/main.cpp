@@ -16,9 +16,11 @@
 
 
 void checkMonitor();
-void setup_steppers();
+void setupSteppers();
 // void handleIncomeMessage(int clientNum, String message);
 
+// ВСЕ СТЕППЕРЫ БУДУТ ЗДЕСЬ.
+// Настройка - в setupSteppers()
 StepperI2C *_thermalCamStepper;
 
 void setup()
@@ -31,7 +33,7 @@ void setup()
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
 
-  setup_steppers();
+  setupSteppers();
   MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
 }
 
@@ -68,65 +70,7 @@ void checkMonitor()
   }
 }
 
-// void handleIncomeMessage(int clientNum, String message)
-// {
-//   DynamicJsonDocument doc(1024);
-//   DeserializationError error = deserializeJson(doc, message);
-//   // Check for deserialization errors
-//   if (error)
-//   {
-//     Logger.error("MessageHandler::HandleIncomeMessage -- Failed to parse JSON");
-//     return;
-//   }
-
-//   const char *msg_type = doc["msg_type"];
-  
-//   // Сообщение типа "Подключился Я, Главный Контроллер"
-//   // { 
-//   // "msg_type": "identity_response",
-//   // "role": "dispatcher" 
-//   // }
-
-//   // если подключился main_controller
-//   if (strcmp(msg_type, "identity_response") == 0) {
-//     if (strcmp(doc["role"], "main_controller") == 0) {
-//       WebSocketServerManager.setMainControllerClientNum(clientNum);
-//     }
-//     return;
-//   }
-
-//   // Сообщение типа "Послать такой-то степпер туда-то"
-//   // {
-//   //  'msg_type': 'stepper_command', 
-//   //  'stepper_name': 'thermal_camera_stepper', 
-//   //  'command_type': 'go_to_x', 
-//   //  'x': '0', 'speed': 1000
-//   // }
-//   const char *command_type = doc["command_type"];
-
-//   if (strcmp(command_type, "go_to_x") == 0)
-//   {
-//     int x = doc["x"].as<int>();
-//     // Check if 'speed' element exists
-//     if (doc.containsKey("speed") && !doc["speed"].isNull())
-//     {
-//       int speed = doc["speed"].as<int>();
-//       _thermalCamStepper->goToX(x, speed);
-//     }
-//     else
-//     {
-//       _thermalCamStepper->goToX(x);
-//     }
-//   }
-//   else if (strcmp(command_type, "basing") == 0) {
-//           _thermalCamStepper->basePositioning();
-//   }
-//   else if (strcmp(command_type, "precise_basing") == 0) {
-//           _thermalCamStepper->preciseBasePositioning();
-//   }
-// }
-
-void setup_steppers()
+void setupSteppers()
 {
   _thermalCamStepper = new StepperI2C(
       DeviceStepper::THERMAL_CAMERA_STEPPER,

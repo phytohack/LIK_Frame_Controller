@@ -12,17 +12,17 @@ class Command {
   bool response_required;
 };
 
-class StepperCommand : public Command {
+class FrameStepperCommand : public Command {
  public:
-  StepperCommand(StepperI2C *stepper) : stepper(stepper){};
+  FrameStepperCommand(StepperI2C *stepper) : stepper(stepper){};
   StepperI2C *stepper;
 };
 
-class StepperGoToXCommand : public StepperCommand {
+class FrameStepperGoToXCommand : public FrameStepperCommand {
  public:
-  StepperGoToXCommand(StepperI2C *stepper, int x) : StepperCommand(stepper), x(x) {}
-  StepperGoToXCommand(StepperI2C *stepper, int x, int speed)
-      : StepperCommand(stepper), x(x), speed(speed) {}
+  FrameStepperGoToXCommand(StepperI2C *stepper, int x) : FrameStepperCommand(stepper), x(x) {}
+  FrameStepperGoToXCommand(StepperI2C *stepper, int x, int speed)
+      : FrameStepperCommand(stepper), x(x), speed(speed) {}
 
   int x;
   int speed = 0;
@@ -33,27 +33,27 @@ class StepperGoToXCommand : public StepperCommand {
   }
 };
 
-class StepperBasingCommand : public StepperCommand {
+class FrameStepperBasingCommand : public FrameStepperCommand {
  public:
-  StepperBasingCommand(StepperI2C *stepper) : StepperCommand(stepper){}
+  FrameStepperBasingCommand(StepperI2C *stepper) : FrameStepperCommand(stepper){}
 
   void execute() override {
     stepper->basePositioning();
   }
 };
 
-class StepperPreciseBasingCommand : public StepperCommand {
+class FrameStepperPreciseBasingCommand : public FrameStepperCommand {
  public:
-  StepperPreciseBasingCommand(StepperI2C *stepper) : StepperCommand(stepper){}
+  FrameStepperPreciseBasingCommand(StepperI2C *stepper) : FrameStepperCommand(stepper){}
 
   void execute() override {
     stepper->preciseBasePositioning();
   }
 };
 
-class StepperStopCommand : public StepperCommand {
+class FrameStepperStopCommand : public FrameStepperCommand {
  public:
-  StepperStopCommand(StepperI2C *stepper) : StepperCommand(stepper){}
+  FrameStepperStopCommand(StepperI2C *stepper) : FrameStepperCommand(stepper){}
 
   void execute() override {
     stepper->stop();
