@@ -65,6 +65,11 @@ void WebSocketServerManager_::setup(String ssid, String pass,
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Logger.println("Connecting to WiFi...");
+    Serial.print("SSID:");
+    Serial.println(ssid);
+    Serial.print("PASS:");
+    Serial.println(pass);
+    Serial.println();
   }
   Logger.println("Connected to WiFi");
   Logger.print("IP address: ");
@@ -77,10 +82,11 @@ void WebSocketServerManager_::setup(String ssid, String pass,
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
     Logger.println("! -- MAIN CONTROLLER NOT CONNECTED -- !");
-  } else {
-    Serial.print("! -- MAIN CONTROLLER CONNECTED WITH NUM: ");
-    Serial.println(getInstance().mainControllerClientNum);
-  }
+  } 
+  // else {
+  //   Serial.print("! -- MAIN CONTROLLER CONNECTED WITH NUM: ");
+  //   Serial.println(getInstance().mainControllerClientNum);
+  // }
 }
 
 void WebSocketServerManager_::setMainControllerClientNum(int num) {

@@ -125,7 +125,7 @@ void MessageHandler_::sendStepperPropertiesToMainController(
 void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
   OutcomeMessage msg = OutcomeMessage();
   msg.addField("request_msg_id", String(requestMsgId));
-  msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONCE));
+  msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONSE));
   msg.addField("status", status);
   WebSocketServerManager.sendToMainController(msg);
 }
