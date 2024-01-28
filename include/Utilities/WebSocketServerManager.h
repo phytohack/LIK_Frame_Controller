@@ -34,12 +34,12 @@ class WebSocketServerManager_ {
   void setup(String ssid, String pass, IPAddress staticIP, IPAddress gateway,
              IPAddress subnet, IPAddress primaryDNS, IPAddress secondaryDNS);
   void loop();
-
+  
   void setIncomeMessageHandler(IncomeMessageHandler incomeMessageHandler);
   void setMainControllerClientNum(int num);
   void send(uint8_t clientNum, String msg);
   void sendToMainController(String msg);
-
+  
   void printMainControllerConnectionState();
 
  private:
@@ -139,6 +139,10 @@ void WebSocketServerManager_::webSocketEvent(uint8_t num, WStype_t type,
       if (getInstance().incomeMessageHandler)
         getInstance().incomeMessageHandler(num, String((char *)payload));
       break;
+    case WStype_PING: {
+    // PING обрабатывается автоматически
+      break;
+    }
     default:
       Logger.warn("WebSocketEvent:: unknown event type: " + String(type));
   }
