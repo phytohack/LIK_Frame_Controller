@@ -72,6 +72,8 @@ void checkMonitor()
               .toInt()); // отправить в координату, пример goto 1000
     else if (input.startsWith("basing")) _thermalCamStepper->basePositioning();
     else if (input.startsWith("precise")) _thermalCamStepper->preciseBasePositioning();
+    else if (input.startsWith("thermal cam on")) _thermalCamSensor->turnOn();
+    else if (input.startsWith("thermal cam off")) _thermalCamSensor->turnOff();
   }
 }
 

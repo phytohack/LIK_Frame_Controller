@@ -27,7 +27,7 @@ class Sensor {
     }
     void turnOff() {
         if (_state == SensorState::OFF) {
-            _mux->digitalWrite(_pin, LOW);
+            _mux->digitalWrite(_pin, HIGH);
             setState(SensorState::OFF);
         }
     }
@@ -57,5 +57,5 @@ class Sensor {
     public:
     void setStateChangeCallback(StateChangeCallback callback) {
         _stateChangeCallback = callback;
-    }
-}
+    };
+};
