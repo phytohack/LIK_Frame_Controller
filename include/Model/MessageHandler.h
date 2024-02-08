@@ -3,7 +3,9 @@
 #include <ArduinoJson.h>
 
 #include "Devices/StepperI2C.h"
+#include "Devices/Sensor.h"
 #include "Model/Commands/StepperCommands.h"
+#include "Model/Commands/SensorCommands.h"
 #include "Model/Message.h"
 #include "Settings/Settings.h"
 #include "Utilities/WebSocketServerManager.h"
@@ -29,22 +31,28 @@ class MessageHandler_ {
   void setThermalStepper(StepperI2C *thermalCamStepper) {
     this->thermalCamStepper = thermalCamStepper;
   }
+  void setThermalCamSensor(Sensor *thermalCamSensor) {
+    this->thermalCamSensor = thermalCamSensor;
+  }
 
   // Входящие
   // Общий приемник
   static void handleIncomeMessageToServer(int clientNum, String response);
 
   // Исходящие
-  void sendCommandResponse(int requestMsgId, bool status);
+  void sendCommandResponse(uint32_t requestMsgId, bool status);
   static void sendStepperPropertiesToMainController(StepperI2C *stepper);
+  static void sendSensorStateToMainController(Sensor *sensor);
 
   Command *createStepperCommand(IncomeMessage msg);
+  Command *createSensorCommand(IncomeMessage msg);
   StepperI2C *thermalCamStepper;
+  Sensor *thermalCamSensor;
 };
 
 void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) {
   Logger.debug("");
-  Logger.debug("--- >>> INCOME MESSAGE");
+  Logger.debug("[MAIN CONTROLLER]    --->    [FRAME CONTROLLER]");
   Logger.debug("----------------------------");
   Logger.debug(strMsg);
   Logger.debug("----------------------------");
@@ -71,6 +79,16 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
       }
       getInstance().sendCommandResponse(msg.msgId, status);
     }
+    else if (msg.jsonDoc["device_type"] == "sensor") {
+      Command *command = getInstance().createSensorCommand(msg);
+      bool status = false;
+      if (command) {
+        command->execute();
+        delete command;
+        status = true;
+      }
+      getInstance().sendCommandResponse(msg.msgId, status);
+    }
   }
 
   else if (msg.msgType == IncomeMsgTypeValue::DEVICE_STATE_REQUEST) {
@@ -84,6 +102,17 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
   }
 }
 
+Command *MessageHandler_::createSensorCommand(IncomeMessage msg) {
+  if (msg.jsonDoc["device_name"] == SensorDeviceNameJSON(DeviceSensor::THERMAL_CAMERA)) {
+    if (msg.jsonDoc["command"] == "on") {
+      return new SensorTurnOnCommand(getInstance().thermalCamSensor);
+    }
+    else if (msg.jsonDoc["command"] == "off") {
+      return new SensorTurnOffCommand(getInstance().thermalCamSensor);
+    }
+  }
+  return nullptr;
+}
 Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
   StepperI2C *stepper = nullptr;
   // выбор степпера
@@ -110,6 +139,15 @@ Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
     return new FrameStepperStopCommand(stepper);
 }
 
+void MessageHandler_::sendSensorStateToMainController(Sensor * sensor) {
+  OutcomeMessage msg = OutcomeMessage();
+  msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_STATE));
+  msg.addField("device_type", String("sensor"));
+  msg.addField("device_name", SensorDeviceNameJSON(sensor->getDeviceSensor()));
+  msg.addField("state", SensorStateNameJSON(sensor->getState()));
+  WebSocketServerManager.sendToMainController(msg);
+}
+
 void MessageHandler_::sendStepperPropertiesToMainController(
     StepperI2C *stepper) {
   OutcomeMessage msg = OutcomeMessage();
@@ -122,7 +160,7 @@ void MessageHandler_::sendStepperPropertiesToMainController(
   WebSocketServerManager.sendToMainController(msg);
 }
 
-void MessageHandler_::sendCommandResponse(int requestMsgId, bool status) {
+void MessageHandler_::sendCommandResponse(uint32_t requestMsgId, bool status) {
   OutcomeMessage msg = OutcomeMessage();
   msg.addField("request_msg_id", String(requestMsgId));
   msg.addField("msg_type", OutcomeMessageTypeNameJSON(OutcomeMsgTypeValue::DEVICE_COMMAND_RESPONSE));

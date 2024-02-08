@@ -3,14 +3,8 @@
 
 #include "Devices/StepperI2C.h"
 #include "Model/Message.h"
+#include "Model/Commands/Command.h"
 
-class Command {
- public:
-  virtual ~Command() {}
-  virtual void execute() = 0;
-
-  bool response_required;
-};
 
 class FrameStepperCommand : public Command {
  public:

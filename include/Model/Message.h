@@ -13,7 +13,7 @@ class IncomeMessage {
 
   DynamicJsonDocument jsonDoc;
 
-  uint8_t msgId;
+  uint32_t msgId;
   IncomeMsgTypeValue msgType = IncomeMsgTypeValue::UNKNOWN;
   bool requiredResponse = false;
 };

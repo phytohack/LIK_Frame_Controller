@@ -103,7 +103,7 @@ void WebSocketServerManager_::loop() { webSocket.loop(); }
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {
   Logger.debug("");
-  Logger.debug("OUTCOME MESSAGE   --- >>>");
+  Logger.debug("[MAIN CONTROLLER]    <---    [FRAME CONTROLLER]");
   Logger.debug("----------------------------");
   Logger.debug(msg);
   Logger.debug("----------------------------");

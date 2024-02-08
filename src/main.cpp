@@ -9,6 +9,7 @@
 #include "Devices/Abstract/MultiplexerFactory.h"
 #include "Devices/LowLevel/LimitSwitcher.h"
 #include "Devices/StepperI2C.h"
+#include "Devices/Sensor.h"
 
 #include "Model/MessageHandler.h"
 
@@ -22,6 +23,7 @@ void setupSteppers();
 // ВСЕ СТЕППЕРЫ БУДУТ ЗДЕСЬ.
 // Настройка - в setupSteppers()
 StepperI2C *_thermalCamStepper;
+Sensor *_thermalCamSensor;
 
 void setup()
 {
@@ -34,7 +36,10 @@ void setup()
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
 
   setupSteppers();
-  MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
+  setupSensors();
+  // MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
+  MessageHandler.setThermalStepper(_thermalCamStepper);
+  MessageHandler.setThermalCamSensor(_thermalCamSensor);
 }
 
 long timer = 0;
@@ -83,4 +88,13 @@ void setupSteppers()
                         THERMAL_CAMERA_STEPPER_BASE_LS_PIN)
   );
   _thermalCamStepper->setPropertiesChangeCallback(MessageHandler.sendStepperPropertiesToMainController);
+}
+
+void setupSensors() 
+{
+  _thermalCamSensor = new Sensor(
+    DeviceSensor::THERMAL_CAMERA,
+    MultiplexerFactory.getMultiplexer(THERMAL_CAMERA__MUX_ADDRESS),
+    THERMAL_CAMERA_TURN_ON_PIN);
+  _thermalCamSensor->setStateChangeCallback(MessageHandler.sendSensorStateToMainController);
 }
