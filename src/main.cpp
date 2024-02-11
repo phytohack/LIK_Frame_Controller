@@ -18,6 +18,7 @@
 
 void checkMonitor();
 void setupSteppers();
+void setupSensors();
 // void handleIncomeMessage(int clientNum, String message);
 
 // ВСЕ СТЕППЕРЫ БУДУТ ЗДЕСЬ.

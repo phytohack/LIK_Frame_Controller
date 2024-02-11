@@ -50,26 +50,26 @@ int StepperBasingAcceleration(DeviceStepper stepper) {
 int StepperPreciseBasingSpeed(DeviceStepper stepper) {
   switch (stepper) {
     case DeviceStepper::THERMAL_CAMERA_STEPPER:
-      return 50;
+      return 10;
     default:
-      return 50;
+      return 10;
   }
 }
 
 int StepperPreciseBasingAcceleration(DeviceStepper stepper) {
   switch (stepper) {
     case DeviceStepper::THERMAL_CAMERA_STEPPER:
-      return 50;
+      return 10;
     default:
-      return 50;
+      return 10;
   }
 }
 
 int StepperPreciseBasingDistance(DeviceStepper stepper) {
   switch (stepper) {
     case DeviceStepper::THERMAL_CAMERA_STEPPER:
-      return 3; // cm
+      return 1; // cm
     default:
-      return 3;
+      return 1;
   }
 }

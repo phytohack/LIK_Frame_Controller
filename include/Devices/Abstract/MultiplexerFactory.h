@@ -15,7 +15,13 @@ public:
     
     Multiplexer* getMultiplexer(int address) {
         if (multiplexers.find(address) == multiplexers.end()) {
+            Serial.print("Creating new multiplexer with address ");
+            Serial.println(address);
             multiplexers[address] = new Multiplexer(address, SDA_PIN, SCL_PIN);
+        } else {
+            Serial.print("Multiplexer with address ");
+            Serial.print(address);
+            Serial.println(" already exists");
         }
         return multiplexers[address];
     }

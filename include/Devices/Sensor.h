@@ -14,19 +14,25 @@ class Sensor {
     _mux(mux),
     _pin(pin)
     {
-        mux->setupAsOutput();
+        mux->setupAsOutput(_pin);
         turnOff();
     }
 
     public:
     void turnOn() {
         if (_state == SensorState::OFF) {
+            Serial.print("Set pin ");
+            Serial.print(_pin);
+            Serial.println(" to LOW");
             _mux->digitalWrite(_pin, LOW);
             setState(SensorState::ON);
         }
     }
     void turnOff() {
-        if (_state == SensorState::OFF) {
+        if (_state == SensorState::ON) {
+            Serial.print("Set pin ");
+            Serial.print(_pin);
+            Serial.println(" to HIGH");
             _mux->digitalWrite(_pin, HIGH);
             setState(SensorState::OFF);
         }
