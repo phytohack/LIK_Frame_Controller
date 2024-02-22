@@ -12,6 +12,7 @@
 #include <WebSocketsServer.h>
 // #include "Model/MessageHandler.h"
 #include "Utilities/Logger.h"
+#include "Utilities/Timer.h"
 // #include "ArduinoJson.h"
 
 using IncomeMessageHandler = std::function<void(const int, const String &)>;
@@ -41,15 +42,23 @@ class WebSocketServerManager_ {
   void sendToMainController(String msg);
   
   void printMainControllerConnectionState();
+  void disconnectClient();
 
  private:
   WebSocketServerManager_() : webSocket(81){};
+  String _ssid;
+  String _pass;
 
   static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
                              size_t length);
   WebSocketsServer webSocket;
   IncomeMessageHandler incomeMessageHandler;
   int mainControllerClientNum = -1;  // -1 indicates dispatcher is not connected
+
+  bool wasConnected = false;
+  Timer disconnectedRebootTimer;
+  uint16_t rebootAfterDisconnectInterval = 30000;
+  bool rebootIfWiFiDisconnectedTimeout = true;
 };
 
 // void WebSocketServerManager_::setup(String ssid, String pass)
@@ -57,12 +66,29 @@ void WebSocketServerManager_::setup(String ssid, String pass,
                                     IPAddress staticIP, IPAddress gateway,
                                     IPAddress subnet, IPAddress primaryDNS,
                                     IPAddress secondaryDNS) {
+  _ssid = ssid;
+  _pass = pass;
+  
   if (!WiFi.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.println("STA Failed to configure");
   }
+  
+  wasConnected = true;
+  disconnectedRebootTimer.setTimer(rebootAfterDisconnectInterval);
+  disconnectedRebootTimer.startTimer();
 
   WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED) {
+    
+    if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
+      Serial.println();
+      Serial.println();
+      Serial.println("------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------");
+      Serial.println();
+      Serial.println();
+      ESP.restart();
+    }
+    
     delay(1000);
     Logger.println("Connecting to WiFi...");
     Serial.print("SSID:");
@@ -77,12 +103,22 @@ void WebSocketServerManager_::setup(String ssid, String pass,
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
+
 }
 
+void WebSocketServerManager_::disconnectClient() {
+  webSocket.disconnect(0);
+  Serial.println("Client disconnection ok");
+}
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
     Logger.println("! -- MAIN CONTROLLER NOT CONNECTED -- !");
-  } 
+  }
+  Serial.print("WiFi Status: ");
+  Serial.println(WiFi.isConnected());
+  Serial.print("Clients connected: ");
+  Serial.println(webSocket.connectedClients());;
+  
   // else {
   //   Serial.print("! -- MAIN CONTROLLER CONNECTED WITH NUM: ");
   //   Serial.println(getInstance().mainControllerClientNum);
@@ -99,7 +135,35 @@ void WebSocketServerManager_::setIncomeMessageHandler(
   this->incomeMessageHandler = incomeMessageHandler;
 }
 
-void WebSocketServerManager_::loop() { webSocket.loop(); }
+void WebSocketServerManager_::loop() { 
+  webSocket.loop(); 
+  if (!WiFi.isConnected()) {
+
+    disconnectedRebootTimer.startTimer();
+
+    Serial.println("WIFI DISCONNECTED!! TRY TO RECONNECT!!!");
+    WiFi.begin(_ssid, _pass);
+    while (WiFi.status() != WL_CONNECTED) {
+      
+      if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
+        Serial.println();
+        Serial.println();
+        Serial.println("------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------");
+        Serial.println();
+        Serial.println();
+        ESP.restart();
+      }
+      
+      delay(1000);
+      Logger.println("Connecting to WiFi...");
+      Serial.print("SSID:");
+      Serial.println(_ssid);
+      Serial.print("PASS:");
+      Serial.println(_pass);
+      Serial.println();
+    }
+  }  
+}
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {
   Logger.debug("");

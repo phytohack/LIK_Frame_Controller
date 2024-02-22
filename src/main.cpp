@@ -75,6 +75,7 @@ void checkMonitor()
     else if (input.startsWith("precise")) _thermalCamStepper->preciseBasePositioning();
     else if (input.startsWith("thermal cam on")) _thermalCamSensor->turnOn();
     else if (input.startsWith("thermal cam off")) _thermalCamSensor->turnOff();
+    else if (input.startsWith("client disconnect")) WebSocketServerManager.disconnectClient();
   }
 }
 
