@@ -7,6 +7,7 @@
 #ifdef ESP32
 // Code specific to ESP32
 #include <WiFi.h>
+#include <ETH.h>
 #endif
 
 #include <WebSocketsServer.h>
@@ -14,6 +15,8 @@
 #include "Utilities/Logger.h"
 #include "Utilities/Timer.h"
 // #include "ArduinoJson.h"
+
+enum class ConnectionMode { WIFI, ETH };
 
 using IncomeMessageHandler = std::function<void(const int, const String &)>;
 
@@ -31,9 +34,8 @@ class WebSocketServerManager_ {
   // --------- SINGLETON ---------
 
  public:
-  // void setup(String ssid, String pass);
-  void setup(String ssid, String pass, IPAddress staticIP, IPAddress gateway,
-             IPAddress subnet, IPAddress primaryDNS, IPAddress secondaryDNS);
+  void setupWiFi(String ssid, String pass, IPAddress staticIP, IPAddress gateway, IPAddress subnet, IPAddress primaryDNS, IPAddress secondaryDNS);
+  void setupETH(IPAddress staticIP, IPAddress gateway, IPAddress subnet, IPAddress primaryDNS, IPAddress secondaryDNS);
   void loop();
   
   void setIncomeMessageHandler(IncomeMessageHandler incomeMessageHandler);
@@ -49,61 +51,55 @@ class WebSocketServerManager_ {
   String _ssid;
   String _pass;
 
-  static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload,
-                             size_t length);
+  ConnectionMode _mode = ConnectionMode::WIFI;
+  void connectToWiFi();
+  void connectToETH();
+
+
+  static void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
   WebSocketsServer webSocket;
   IncomeMessageHandler incomeMessageHandler;
   int mainControllerClientNum = -1;  // -1 indicates dispatcher is not connected
 
-  bool wasConnected = false;
   Timer disconnectedRebootTimer;
   uint16_t rebootAfterDisconnectInterval = 30000;
   bool rebootIfWiFiDisconnectedTimeout = true;
 };
 
-// void WebSocketServerManager_::setup(String ssid, String pass)
-void WebSocketServerManager_::setup(String ssid, String pass,
+void WebSocketServerManager_::setupETH(IPAddress staticIP, IPAddress gateway,
+                                    IPAddress subnet, IPAddress primaryDNS,
+                                    IPAddress secondaryDNS) {
+  _mode = ConnectionMode::ETH;
+
+  if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Logger.println("ETH STATIC IP Failed to configure");
+  }
+
+  disconnectedRebootTimer.setTimer(rebootAfterDisconnectInterval);
+
+  connectToETH();
+
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+}
+void WebSocketServerManager_::setupWiFi(String ssid, String pass,
                                     IPAddress staticIP, IPAddress gateway,
                                     IPAddress subnet, IPAddress primaryDNS,
                                     IPAddress secondaryDNS) {
+  _mode = ConnectionMode::WIFI;
   _ssid = ssid;
   _pass = pass;
-  
+
   if (!WiFi.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.println("STA Failed to configure");
   }
   
-  wasConnected = true;
   disconnectedRebootTimer.setTimer(rebootAfterDisconnectInterval);
-  disconnectedRebootTimer.startTimer();
 
-  WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED) {
-    
-    if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
-      Serial.println();
-      Serial.println();
-      Serial.println("------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------");
-      Serial.println();
-      Serial.println();
-      ESP.restart();
-    }
-    
-    delay(1000);
-    Logger.println("Connecting to WiFi...");
-    Serial.print("SSID:");
-    Serial.println(ssid);
-    Serial.print("PASS:");
-    Serial.println(pass);
-    Serial.println();
-  }
-  Logger.println("Connected to WiFi");
-  Logger.print("IP address: ");
-  Logger.println(WiFi.localIP().toString());
+  connectToWiFi();
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-
 }
 
 void WebSocketServerManager_::disconnectClient() {
@@ -114,15 +110,10 @@ void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
     Logger.println("! -- MAIN CONTROLLER NOT CONNECTED -- !");
   }
-  Serial.print("WiFi Status: ");
-  Serial.println(WiFi.isConnected());
+  // Serial.print("WiFi Status: ");
+  // Serial.println(WiFi.isConnected());
   Serial.print("Clients connected: ");
-  Serial.println(webSocket.connectedClients());;
-  
-  // else {
-  //   Serial.print("! -- MAIN CONTROLLER CONNECTED WITH NUM: ");
-  //   Serial.println(getInstance().mainControllerClientNum);
-  // }
+  Serial.println(webSocket.connectedClients());
 }
 
 void WebSocketServerManager_::setMainControllerClientNum(int num) {
@@ -135,34 +126,52 @@ void WebSocketServerManager_::setIncomeMessageHandler(
   this->incomeMessageHandler = incomeMessageHandler;
 }
 
+void WebSocketServerManager_::connectToWiFi() {
+  disconnectedRebootTimer.startTimer();
+
+  WiFi.begin(_ssid, _pass);
+  while (WiFi.status() != WL_CONNECTED) {  
+    if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
+      Serial.printf("\n\n ------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------ \n\n");
+      ESP.restart();
+    }
+    
+    delay(2000);
+    Serial.println("Connecting to WiFi...");
+    Serial.printf("SSID: %s \n PASS: %s \n", _ssid, _pass);
+  }
+  Logger.println("Connected to WiFi");
+  Logger.print("IP address: ");
+  Logger.println(WiFi.localIP().toString());
+}
+
+void WebSocketServerManager_::connectToETH() {
+  disconnectedRebootTimer.startTimer();
+
+  ETH.begin();
+  while (!ETH.linkUp()) {  
+    if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
+      Serial.printf("\n\n ------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------ \n\n");
+      ESP.restart();
+    }
+    Serial.println("Waiting for Ethernet link...");
+    delay(2000);
+  }
+  Logger.println("Connected via Ethernet");
+  Logger.print("IP address: ");
+  Logger.println(ETH.localIP().toString());
+}
+
 void WebSocketServerManager_::loop() { 
   webSocket.loop(); 
-  if (!WiFi.isConnected()) {
-
-    disconnectedRebootTimer.startTimer();
-
+  if (_mode == ConnectionMode::WIFI && !WiFi.isConnected()) {
     Serial.println("WIFI DISCONNECTED!! TRY TO RECONNECT!!!");
-    WiFi.begin(_ssid, _pass);
-    while (WiFi.status() != WL_CONNECTED) {
-      
-      if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
-        Serial.println();
-        Serial.println();
-        Serial.println("------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------");
-        Serial.println();
-        Serial.println();
-        ESP.restart();
-      }
-      
-      delay(1000);
-      Logger.println("Connecting to WiFi...");
-      Serial.print("SSID:");
-      Serial.println(_ssid);
-      Serial.print("PASS:");
-      Serial.println(_pass);
-      Serial.println();
-    }
-  }  
+    connectToWiFi();
+  }
+  else if (_mode == ConnectionMode::ETH && !ETH.linkUp()) {
+    Serial.println("ETHERNET DISCONNECTED!! TRY TO RECONNECT!!!");
+    connectToETH();
+  }
 }
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {

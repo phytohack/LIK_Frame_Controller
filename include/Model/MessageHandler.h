@@ -63,8 +63,8 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
     if (msg.jsonDoc["role"] == "main_controller") {
       Logger.debug("Get identity request with role == main_controller");
       WebSocketServerManager.setMainControllerClientNum(clientNum);
-      getInstance().sendStepperPropertiesToMainController(
-          getInstance().thermalCamStepper);
+      getInstance().sendStepperPropertiesToMainController(getInstance().thermalCamStepper);
+      getInstance().sendSensorStateToMainController(getInstance().thermalCamSensor);
     }
   }
 
