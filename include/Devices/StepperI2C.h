@@ -25,7 +25,7 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
              LimitSwitcher* baseLimitSwitcher)
       : StepperI2C(deviceStepper, mux, stepsPerTurn, stepPin, dirPin, enaPin) {
     _baseLimitSwitcher = baseLimitSwitcher;
-    delay(12);
+    delay(20);
     if (_baseLimitSwitcher->isPushed()) _setPosition(StepperPosition::BASE);
   };
 
@@ -48,18 +48,10 @@ class StepperI2C : public GStepper<STEPPER_I2C> {
   void preciseBasePositioning();
 
   int convertFromXToCm(int x) {
-    int cm = x / (400000/7897);
-    // int cm = x / (64000/1256);
-    // cm /= 10;
-    // return cm;
-    return cm;
+    return int(x / (400000/7897));
   }
   int convertFromCmToX(int cm) {
-    int x = cm * (400000/7897);
-    // int x = cm * (64000/1256); // 1600 шагов на 1:4 редуктора    |||   d40*3,14
-    // x *= 10; // тк выше формула - в мм
-    // return x;
-    return x;
+    return int(cm * (400000/7897));
   }
 
  private:
