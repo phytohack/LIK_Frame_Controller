@@ -7,14 +7,29 @@
 #ifdef ESP32
 // Code specific to ESP32
 #include <WiFi.h>
+
+// ETHERNET
 #include <ETH.h>
+// Following Settings from  https://www.kincony.com/how-to-programming.html
+#include <SPI.h>
+// Then the type of chip used:
+#define ETH_TYPE       ETH_PHY_LAN8720
+// Control pins:
+#define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
+#define ETH_MDC_PIN 23
+#define ETH_MDIO_PIN 18
+// And other interface settings:
+#define ETH_POWER_PIN -1
+#define ETH_ADDR 0
+#define NRST 5
+
+
 #endif
 
 #include <WebSocketsServer.h>
-// #include "Model/MessageHandler.h"
+
 #include "Utilities/Logger.h"
 #include "Utilities/Timer.h"
-// #include "ArduinoJson.h"
 
 enum class ConnectionMode { WIFI, ETH };
 
@@ -71,13 +86,37 @@ void WebSocketServerManager_::setupETH(IPAddress staticIP, IPAddress gateway,
                                     IPAddress secondaryDNS) {
   _mode = ConnectionMode::ETH;
 
+  // from kincony site
+  // WiFi.onEvent(WiFiEvent); //https://www.kincony.com/how-to-programming.html
+  pinMode(NRST, OUTPUT);
+  digitalWrite(NRST, 0); delay(200);
+  digitalWrite(NRST, 1); delay(200);
+  digitalWrite(NRST, 0); delay(200);
+  digitalWrite(NRST, 1);
+  ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE,
+  ETH_CLK_MODE);
+
+  delay(1000);
+
+
   if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.println("ETH STATIC IP Failed to configure");
+  } else {
+    Logger.println("ETH STATIC IP Configured OOOKKK :-D");
   }
 
   disconnectedRebootTimer.setTimer(rebootAfterDisconnectInterval);
 
-  connectToETH();
+  // connectToETH();
+  int connectingTime = 0;
+  while (!ETH.linkUp()) {
+    delay(1000);
+    connectingTime += 1;
+    Serial.printf("SETUP: Waiting For Ethernet Link...  %d \n", connectingTime);
+  }
+  Logger.println("Connected via Ethernet");
+  Logger.print("IP address: ");
+  Logger.println(ETH.localIP().toString());
 
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
@@ -148,7 +187,10 @@ void WebSocketServerManager_::connectToWiFi() {
 void WebSocketServerManager_::connectToETH() {
   disconnectedRebootTimer.startTimer();
 
-  ETH.begin();
+  
+
+  ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+  
   while (!ETH.linkUp()) {  
     if (rebootIfWiFiDisconnectedTimeout && disconnectedRebootTimer.isItTime()) {
       Serial.printf("\n\n ------ CAN'T CONNECT FOR 30 SECONDS. RESTART CONTROLLER ------ \n\n");

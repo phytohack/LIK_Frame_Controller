@@ -30,8 +30,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  // WebSocketServerManager.setupWiFi(ssid, password, staticIP, gateway, subnet, primaryDNS, secondaryDNS);
-  WebSocketServerManager.setupETH(staticIP, gateway, subnet, primaryDNS, secondaryDNS);
+  WebSocketServerManager.setupWiFi(ssid, password, staticIP, gateway, subnet, primaryDNS, secondaryDNS);
+  // WebSocketServerManager.setupETH(staticIP, gateway, subnet, primaryDNS, secondaryDNS);
   
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
@@ -76,6 +76,7 @@ void checkMonitor()
     else if (input.startsWith("thermal cam on")) _thermalCamSensor->turnOn();
     else if (input.startsWith("thermal cam off")) _thermalCamSensor->turnOff();
     else if (input.startsWith("client disconnect")) WebSocketServerManager.disconnectClient();
+    else if (input.startsWith("reboot")) ESP.restart();
   }
 }
 
