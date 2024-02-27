@@ -30,8 +30,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  WebSocketServerManager.setupWiFi(ssid, password, staticIP, gateway, subnet, primaryDNS, secondaryDNS);
-  // WebSocketServerManager.setupETH(staticIP, gateway, subnet, primaryDNS, secondaryDNS);
+  // WebSocketServerManager.setupWiFi(ssid, password, staticIP, gateway, subnet, primaryDNS, secondaryDNS);
+  WebSocketServerManager.setupETH(staticIP, gateway, subnet, primaryDNS, secondaryDNS);
   
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);

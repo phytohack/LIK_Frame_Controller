@@ -79,6 +79,40 @@ class WebSocketServerManager_ {
   Timer disconnectedRebootTimer;
   uint16_t rebootAfterDisconnectInterval = 30000;
   bool rebootIfWiFiDisconnectedTimeout = true;
+
+
+  // ETHERNET 
+  // для ETHERNET (https://www.kincony.com/how-to-programming.html)
+  bool eth_connected = false;
+  static void WiFiEvent(WiFiEvent_t event) {
+    switch (event) {
+    case SYSTEM_EVENT_ETH_START:
+      Serial.println("ETH Started");
+      ETH.setHostname("esp32-ethernet");
+      break;
+    case SYSTEM_EVENT_ETH_CONNECTED:
+      Serial.println("ETH Connected");
+      break;
+    case SYSTEM_EVENT_ETH_GOT_IP:
+      Serial.print("ETH MAC: "); Serial.print(ETH.macAddress());
+      Serial.print(", IPv4: "); Serial.print(ETH.localIP());
+      if (ETH.fullDuplex()) {Serial.print(", FULL_DUPLEX");}
+      Serial.print(", "); Serial.print(ETH.linkSpeed()); Serial.println("Mbps");
+      getInstance().eth_connected = true;
+      break;
+    case SYSTEM_EVENT_ETH_DISCONNECTED:
+      Serial.println("ETH Disconnected");
+      getInstance().eth_connected = false;
+      break;
+    case SYSTEM_EVENT_ETH_STOP:
+      Serial.println("ETH Stopped");
+      getInstance().eth_connected = false;
+      break;
+    default:
+      break;
+    }
+  } // WiFiEvent( )
+
 };
 
 void WebSocketServerManager_::setupETH(IPAddress staticIP, IPAddress gateway,
@@ -87,17 +121,19 @@ void WebSocketServerManager_::setupETH(IPAddress staticIP, IPAddress gateway,
   _mode = ConnectionMode::ETH;
 
   // from kincony site
-  // WiFi.onEvent(WiFiEvent); //https://www.kincony.com/how-to-programming.html
+  WiFi.onEvent(WiFiEvent); //https://www.kincony.com/how-to-programming.html
   pinMode(NRST, OUTPUT);
   digitalWrite(NRST, 0); delay(200);
   digitalWrite(NRST, 1); delay(200);
   digitalWrite(NRST, 0); delay(200);
   digitalWrite(NRST, 1);
-  ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE,
+  bool ethBegin = ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE,
   ETH_CLK_MODE);
 
   delay(1000);
 
+  Serial.print("BEGIN RESULT : ");
+  Serial.println(ethBegin);
 
   if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.println("ETH STATIC IP Failed to configure");
@@ -187,7 +223,7 @@ void WebSocketServerManager_::connectToWiFi() {
 void WebSocketServerManager_::connectToETH() {
   disconnectedRebootTimer.startTimer();
 
-  
+
 
   ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
   
