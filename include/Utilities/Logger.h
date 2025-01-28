@@ -2,6 +2,8 @@
 #include <Arduino.h>
 
 #define WRITE_LOG_TO_SERIAL true
+#define WRITE_LOG_TO_SPIFFS true
+
 
 class Logger_
 {
