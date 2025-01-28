@@ -46,6 +46,10 @@ void WiFiConnection_::connect() {
   WiFi.begin(ssid, password);
 }
 
+void WiFiConnection_::disconnect() {
+  WiFi.disconnect();
+}
+
 bool WiFiConnection_::isConnected() {
   return WiFi.isConnected();
 }

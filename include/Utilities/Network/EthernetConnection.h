@@ -70,10 +70,18 @@ bool EthernetConnection_::setup() {
  return true;
 }
 
-
 void EthernetConnection_::connect() {
   Serial.println("Connecting with Ethernet...");
   ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+}
+
+void EthernetConnection_::disconnect() {
+    // ETH.end(); // старая версия? нет такой функции
+    _ethConnected = false;
+}
+
+IPAddress EthernetConnection_::getIP() {
+    return ETH.localIP();
 }
 
 bool EthernetConnection_::isConnected() {
