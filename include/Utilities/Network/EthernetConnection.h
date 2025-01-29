@@ -5,7 +5,7 @@
 #include <SPI.h>
 
 #include "Utilities/Network/AbsNetworkConnection.h"
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 #include "Settings/Settings.h"
 
 // --------- Параметры Ethernet (https://www.kincony.com/how-to-programming.html)
@@ -63,15 +63,15 @@ bool EthernetConnection_::setup() {
 //   Serial.println(ethBegin);
 
   if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Logger.println("ETH Static IP Failed to configure");
+    Logger.warn("ETH Static IP Failed to configure");
   } else {
-    Logger.println("ETH Static IP Configured Successfully");
+    Logger.info("ETH Static IP Configured Successfully");
   }
  return true;
 }
 
 void EthernetConnection_::connect() {
-  Serial.println("Connecting with Ethernet...");
+  Logger.info("Connecting with Ethernet...");
   ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
 }
 
@@ -92,34 +92,31 @@ bool EthernetConnection_::isConnected() {
 // ------------------ Статический callback на события Ethernet ------------------
 
 void EthernetConnection_::_ethEventHandler(WiFiEvent_t event) {
+    String log_msg = "";
     switch (event) {
         case SYSTEM_EVENT_ETH_START:
-            Serial.println("ETH Started");
+            Logger.info("ETH Started");
             ETH.setHostname("esp32-ethernet");
             break;
         case SYSTEM_EVENT_ETH_CONNECTED:
-            Serial.println("ETH Connected");
+            Logger.info("ETH Connected");
             break;
         case SYSTEM_EVENT_ETH_GOT_IP:
-            Serial.print("ETH MAC: ");
-            Serial.print(ETH.macAddress());
-            Serial.print(", IPv4: ");
-            Serial.print(ETH.localIP());
+            log_msg = "ETH MAC: " + String(ETH.macAddress()) + ", IPv4: " + String(ETH.localIP());
             if (ETH.fullDuplex()) {
-                Serial.print(", FULL_DUPLEX");
+                log_msg += ", FULL_DUPLEX";
             }
-            Serial.print(", ");
-            Serial.print(ETH.linkSpeed());
-            Serial.println("Mbps");
+            log_msg += ", " + String(ETH.linkSpeed()) + "Mbps";
+            Logger.info(log_msg);
             // Обновим флаг в синглтоне
             EthernetConnection_::getInstance()._ethConnected = true;
             break;
         case SYSTEM_EVENT_ETH_DISCONNECTED:
-            Serial.println("ETH Disconnected");
+            Logger.warn("ETH Disconnected");
             EthernetConnection_::getInstance()._ethConnected = false;
             break;
         case SYSTEM_EVENT_ETH_STOP:
-            Serial.println("ETH Stopped");
+            Logger.warn("ETH Stopped");
             EthernetConnection_::getInstance()._ethConnected = false;
             break;
         default:

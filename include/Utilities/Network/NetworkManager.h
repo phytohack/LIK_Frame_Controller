@@ -4,7 +4,7 @@
 #include "Utilities/Network/WiFiConnection.h"
 #include "Utilities/Network/EthernetConnection.h"
 #include "Utilities/Timer.h"
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 #include "Settings/Settings.h"
 
 class NetworkManager_ {
@@ -45,7 +45,7 @@ void NetworkManager_::begin() {
     }
   
     if (!_connection->setup()) {
-        Logger.println("NetworkManager: setup() failed!");
+        Logger.error("NetworkManager: setup() failed!");
     }
 
     _connect();

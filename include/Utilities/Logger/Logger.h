@@ -4,6 +4,9 @@
 
 #include "Settings/Logger.h"
 #include "Utilities/Logger/ILogHandler.h"
+
+#include "Utilities/Logger/SerialLogHandler.h"
+#include "Utilities/Logger/SpiffsLogHandler.h"
 /*
 Менеджер логирования.
 Управляет "синками" логов ILogHandlers (Serial, SD, WiFi, etc).
@@ -23,9 +26,16 @@ private:
   Logger_(const Logger_ &) = delete;
   Logger_ &operator=(const Logger_ &) = delete;
 
-  String _dataBuffer = "";
-  LogLevel _currentLogLevel = DEBUG;
 // ------------- SINGLETON ---------------
+public:
+  void setup()
+  {
+  SerialLogHandler* serialHandler = new SerialLogHandler(LogLevel::DEBUG);
+  SpiffsLogHandler* spiffsHandler = new SpiffsLogHandler(LogLevel::ERROR);
+
+  addHandler(serialHandler);
+  addHandler(spiffsHandler);
+  }
 
   // Добавить новый обработчик
   void addHandler(ILogHandler* handler) {
@@ -35,20 +45,37 @@ private:
   void log(LogLevel level, const char* message) {
       // Проходим по всем обработчикам и шлём
       for (auto handler : _handlers) {
-          handler->logMessage(level, message);
+          handler->logMessage(level, _formatMessage(level, message));
       }
   }
+  // Перегруженные методы для String
+  void log(LogLevel level, const String &message) {
+      log(level, message.c_str());
+  }
 
-  // Удобные "шорткаты":
+  // Удобные шорткаты:
   void debug(const char* msg)  { log(LogLevel::DEBUG,   msg); }
   void info(const char* msg)   { log(LogLevel::INFO,    msg); }
   void warn(const char* msg)   { log(LogLevel::WARN,    msg); }
   void error(const char* msg)  { log(LogLevel::ERROR,   msg); }
   void fatal(const char* msg)  { log(LogLevel::FATAL,   msg); }
 
+  // Удобные шорткаты с String
+  void debug(const String &msg)  { log(LogLevel::DEBUG,   msg); }
+  void info(const String &msg)   { log(LogLevel::INFO,    msg); }
+  void warn(const String &msg)   { log(LogLevel::WARN,    msg); }
+  void error(const String &msg)  { log(LogLevel::ERROR,   msg); }
+  void fatal(const String &msg)  { log(LogLevel::FATAL,   msg); }
+
+
 private:
-    // Храним набор обработчиков (sinks)
-    std::vector<ILogHandler*> _handlers;  
+  // Храним набор обработчиков (sinks)
+  std::vector<ILogHandler*> _handlers;  
+
+  String _formatMessage(LogLevel level, String msg) {
+    String datetime = Clock.getDateTime();
+    return "[" + datetime + "] " + logLevelToString(level) + " " + msg;
+  }
 };
 
 

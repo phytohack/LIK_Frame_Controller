@@ -2,7 +2,7 @@
 
 #include <WebSocketsServer.h>
 
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 #include "Utilities/Timer.h"
 
 using IncomeMessageHandler = std::function<void(const int, const String &)>;
@@ -53,10 +53,10 @@ void WebSocketServerManager_::disconnectClient() {
 
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
-    Logger.println("! -- MAIN CONTROLLER NOT CONNECTED -- !");
+    Logger.debug("! -- MAIN CONTROLLER NOT CONNECTED -- !");
   }
-  Serial.print("Clients connected: ");
-  Serial.println(webSocket.connectedClients());
+  Logger.debug("Clients connected: ");
+  Logger.debug(String(webSocket.connectedClients()));
 }
 
 void WebSocketServerManager_::setMainControllerClientNum(int num) {
@@ -94,7 +94,7 @@ void WebSocketServerManager_::webSocketEvent(uint8_t num, WStype_t type,
     case WStype_DISCONNECTED:
       if (num == getInstance().mainControllerClientNum) {
         getInstance().mainControllerClientNum = -1;
-        Logger.println("MainController disconnected!");
+        Logger.warn("MainController disconnected!");
       }
       break;
     case WStype_CONNECTED: {

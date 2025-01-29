@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 
 #include "Settings/MessageProtocol.h"
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 
 // enum class IncomeMessageType { IDENTITY_RESPONSE, COMMAND, UNKNOWN };
 
@@ -32,8 +32,8 @@ IncomeMessage::IncomeMessage(String msg) : jsonDoc(1024) {
   if (jsonDoc.containsKey("required_response") &&
       !jsonDoc["required_response"].isNull()) {
     bool requiredResponse = jsonDoc["required_response"].as<bool>();
-    Logger.print("Required Response exists and equal: ");
-    Logger.println(String(requiredResponse));
+    Logger.info("Required Response exists and equal: ");
+    Logger.info(String(requiredResponse));
   }
 };
 

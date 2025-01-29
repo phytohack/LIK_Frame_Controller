@@ -20,3 +20,22 @@ enum LogLevel
     INFO,   // информационные сообщения, о событиях и состояниях
     DEBUG   // отладочные сообщения, для отслеживания работы программы
 };
+
+const char* logLevelToString(LogLevel level) {
+    switch(level) {
+        case OFF:
+            return "[OFF]";
+        case FATAL:
+            return "[FATAL]";
+        case ERROR:
+            return "[ERROR]";
+        case WARN:
+            return "[WARN]";
+        case INFO:
+            return "[INFO]";
+        case DEBUG:
+            return "[DEBUG]";
+        default:
+            return "[UNKNOWN]";
+    }
+}

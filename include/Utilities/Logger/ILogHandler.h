@@ -12,7 +12,8 @@ public:
     virtual LogLevel getMinLevel() { return _minLevel; }
 
     // Собственно метод для приёма сообщений
-    virtual void logMessage(LogLevel level, const char* message) = 0;
+    // virtual void logMessage(LogLevel level, const char* message) = 0;
+    virtual void logMessage(LogLevel level, String message) = 0;
 protected:
     LogLevel _minLevel = LogLevel::DEBUG;
 };

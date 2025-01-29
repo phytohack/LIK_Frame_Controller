@@ -21,25 +21,26 @@ private:
 // ------------- SINGLETON ---------------
 
 public:
-    void initialize(const char* ntpServer = "pool.ntp.org", long gmtOffset_sec = 0, int daylightOffset_sec = 0, unsigned long timeout_ms = 10000) {
+    void initialize(int year = 2025, int month = 1, int day = 1, int hour = 0, int min = 0, int sec = 0) {
+        _status = TimeStatus::UNSYNCHRONIZED;
+        _setBaseTime(year, month, day, hour, min, sec);
+        _lastUpdate = millis();
+    }
+    
+    void synchronize(const char* ntpServer = "pool.ntp.org", long gmtOffset_sec = 3 * 3600, int daylightOffset_sec = 0, unsigned long timeout_ms = 10000) {
         configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
         Serial.println("Synchronizing time...");
         unsigned long start = millis();
         while (!time(nullptr)) {
             if (millis() - start > timeout_ms) {
-                Serial.println("\nTime sync failed. Starting from 00:00:00.");
-                _status = TimeStatus::UNSYNCHRONIZED;
-                _setBaseTime(2025, 1, 1, 0, 0, 0);
-                _lastUpdate = millis();
-                break;
+                Serial.println("\nTime sync failed. Continuing with base time.");
+                return;
             }
             Serial.print(".");
             delay(500);
         }
-        if (_status != TimeStatus::UNSYNCHRONIZED) {
-            Serial.println("\nTime synchronized.");
-            _status = TimeStatus::SYNCHRONIZED;
-        }
+        Serial.println("\nTime synchronized.");
+        _status = TimeStatus::SYNCHRONIZED;
     }
 
     void update() {

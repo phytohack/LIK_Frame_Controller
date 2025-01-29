@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include "Utilities/Network/AbsNetworkConnection.h"
 
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 #include "Utilities/Timer.h"
 #include "Settings/Settings.h"
 
@@ -34,7 +34,7 @@ class WiFiConnection_ : public AbsNetworkConnection {
 
 bool WiFiConnection_::setup() {
   if (!WiFi.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Logger.println("STA Failed to configure");
+    Logger.error("STA Failed to configure");
     return false;
   }
   return true;
