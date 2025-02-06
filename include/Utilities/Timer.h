@@ -4,14 +4,14 @@
 class Timer {
 public:
   Timer();
-  Timer(unsigned long timer_value);
+  Timer(uint32_t timer_value);
 
-  void setTimer(unsigned long timer_value);
+  void setTimer(uint32_t timer_value);
   unsigned long getTimer();
   void startTimer();
   void resetTimer();
 
-  bool isItTime();
+  bool isExpired();
   bool hasMinutePassed();
 
   unsigned long timeLeft();
@@ -27,11 +27,11 @@ private:
 
 Timer::Timer() {}
 
-Timer::Timer(unsigned long timer_value) {
+Timer::Timer(uint32_t timer_value) {
   setTimer(timer_value);
 }
 
-void Timer::setTimer(unsigned long timer_value) {
+void Timer::setTimer(uint32_t timer_value) {
   _timer_value = timer_value;
 }
 
@@ -48,7 +48,7 @@ void Timer::resetTimer() {
   _start_time = 0;
 }
 
-bool Timer::isItTime() {
+bool Timer::isExpired() {
   if (millis() - _start_time > _timer_value) return true;
   else return false;
 }

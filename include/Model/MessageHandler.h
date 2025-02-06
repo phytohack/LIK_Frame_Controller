@@ -28,7 +28,7 @@ class MessageHandler_ {
   // --------- SINGLETON -----------
 
  public:
-  void setThermalStepper(StepperI2C *thermalCamStepper) {
+  void setThermalCamStepper(StepperI2C *thermalCamStepper) {
     this->thermalCamStepper = thermalCamStepper;
   }
   void setThermalCamSensor(Sensor *thermalCamSensor) {
@@ -46,6 +46,7 @@ class MessageHandler_ {
 
   Command *createStepperCommand(IncomeMessage msg);
   Command *createSensorCommand(IncomeMessage msg);
+  
   StepperI2C *thermalCamStepper;
   Sensor *thermalCamSensor;
 };

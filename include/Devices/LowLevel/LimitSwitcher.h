@@ -1,7 +1,7 @@
 #pragma once
 #include <PCF8575.h>
 #include "Devices/LowLevel/Multiplexer.h"
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 #include "Settings/Settings.h"
 
 class LimitSwitcher {

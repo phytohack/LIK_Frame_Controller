@@ -2,7 +2,7 @@
 // #include <PCF8575.h>
 #include <PCF8574.h>
 
-#include "Utilities/Logger.h"
+#include "Utilities/Logger/Logger.h"
 
 // class Multiplexer : public PCF8575 {
 class Multiplexer : public PCF8574 {

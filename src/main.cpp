@@ -1,9 +1,13 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-// #include "Devices/SensorStepperController.h"
 #include "Settings/Settings.h"
+#include "Utilities/Network/NetworkManager.h"
 #include "Utilities/WebSocketServerManager.h"
+#include "Utilities/Clock.h"
+#include "Utilities/Logger/Logger.h"
+#include "Utilities/SPIFFSManager.h"
+#include "Utilities/HttpServerManager.h"
 
 #include "Devices/LowLevel/Multiplexer.h"
 #include "Devices/Abstract/MultiplexerFactory.h"
@@ -12,34 +16,43 @@
 #include "Devices/Sensor.h"
 
 #include "Model/MessageHandler.h"
-
 #include "Settings/Settings.h"
 
 
 void checkMonitor();
 void setupSteppers();
 void setupSensors();
-// void handleIncomeMessage(int clientNum, String message);
 
-// ВСЕ СТЕППЕРЫ БУДУТ ЗДЕСЬ.
-// Настройка - в setupSteppers()
+// ВСЕ СТЕППЕРЫ БУДУТ ЗДЕСЬ (настройка - в setupSteppers(), вызывается из setup())
+// 1. ТЕПЛОВИЗОР
 StepperI2C *_thermalCamStepper;
 Sensor *_thermalCamSensor;
 
 void setup()
 {
   Serial.begin(115200);
-
-  // WebSocketServerManager.setupWiFi(ssid, password, staticIP, gateway, subnet, primaryDNS, secondaryDNS);
-  WebSocketServerManager.setupETH(staticIP, gateway, subnet, primaryDNS, secondaryDNS);
+  SPIFFSManager.begin(); // инициализация SPIFFS
+  Clock.initialize(); // инициализация часов с нулевым временем
   
+  // ЛОГЕР
+  Logger.setup(); // добавляются Serial и SPIFFS логгеры
+  Logger.debug("This is a debug message.");
+  Logger.info("This is an info message.");
+  Logger.warn("This is a warning message.");
+  Logger.error("This is an error message.");
+  Logger.fatal("This is a fatal message.");
+
+  // Тип подключения (WiFi или ETH) - в Settings/NetworkSettings.h
+  NetworkManager.begin();
+  Clock.synchronize(); // синхронизация времени с NTP сервером
+  HttpServerManager.begin(); // запуск HTTP сервера
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
 
   setupSteppers();
   setupSensors();
   // MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
-  MessageHandler.setThermalStepper(_thermalCamStepper);
+  MessageHandler.setThermalCamStepper(_thermalCamStepper);
   MessageHandler.setThermalCamSensor(_thermalCamSensor);
 }
 
@@ -49,11 +62,13 @@ void loop()
   if (millis() - timer > 5000)
   {
     timer = millis();
-    WebSocketServerManager.printMainControllerConnectionState();
+    //WebSocketServerManager.printMainControllerConnectionState();
   }
 
   checkMonitor();
+  NetworkManager.maintainConnection(); // поддержание соединения
   WebSocketServerManager.loop();
+  HttpServerManager.handleClient();
 }
 
 void checkMonitor()

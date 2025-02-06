@@ -168,7 +168,7 @@ void StepperI2C::goToX(long cm, long speed, long acceleration) {
   Timer timer(100);
   timer.startTimer();
   while (tick()) {  // Ехать
-    if (timer.isItTime()) {
+    if (timer.isExpired()) {
       timer.startTimer();
       Serial.print(".");
       // убрал проверку концевика под таймер, потому что проверка каждый раз
@@ -211,7 +211,7 @@ void StepperI2C::basePositioning(int speed, int acc) {
   Timer timer(100);
   timer.startTimer();
   while (tick()) {
-    if (timer.isItTime()) {
+    if (timer.isExpired()) {
       timer.startTimer();
       if (_baseLimitSwitcher->isPushed()) {
         _handleBaseLimitSwitcherPushing();

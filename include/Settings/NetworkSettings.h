@@ -1,17 +1,17 @@
 #pragma once
 #include <Arduino.h>
+#include <WiFi.h>
+
 #include "Settings/Settings.h"
 
-#ifdef ESP8266
-// Code specific to ESP8266
-#include <ESP8266WiFi.h>
-#endif
+// Тип соединения
+enum class ConnectionMode { WIFI, ETH };
+// const ConnectionMode CONNECTION_MODE = ConnectionMode::ETH;
+const ConnectionMode CONNECTION_MODE = ConnectionMode::WIFI;
 
-#ifdef ESP32
-// Code specific to ESP32
-#include <WiFi.h>
-#endif
-
+// Настройки перезагрузки в случае отсутствия соединения
+const bool REBOOT_AFTER_CONNECTION_TIMEOUT_FLAG = true;
+const uint32_t REBOOT_AFTER_DISCONNECT_TIMEOUT = 30000;
 
 // разделение на рабочие (там esp32) и домашние настройки (там esp8266)
 #ifdef WORK_WIFI
