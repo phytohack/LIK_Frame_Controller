@@ -14,7 +14,7 @@ public:
     void logMessage(LogLevel level, String message) override {
         // Проверяем, стоит ли выводить этот уровень
         // static_cast явно указывает намерение “преобразовать тип А в тип B”
-        if (static_cast<int>(level) >= static_cast<int>(_minLevel)) {
+        if (static_cast<int>(level) <= static_cast<int>(_minLevel)) {
             // Предположим, что Serial уже инициализирован:
             Serial.println(message);
         }

@@ -57,10 +57,10 @@ bool EthernetConnection_::setup() {
   digitalWrite(NRST, 1);
   
   // 3. Запускаем ETH
-  // bool ethBegin = ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
-//   delay(1000);
-//   Serial.print("ETHERNET BEGIN RESULT : ");
-//   Serial.println(ethBegin);
+  bool ethBegin = ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+  delay(1000);
+  Logger.info("ETHERNET BEGIN RESULT : ");
+  Logger.info(String(ethBegin));
 
   if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.warn("ETH Static IP Failed to configure");
@@ -71,8 +71,11 @@ bool EthernetConnection_::setup() {
 }
 
 void EthernetConnection_::connect() {
-  Logger.info("Connecting with Ethernet...");
-  ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+  if (!isConnected()) {
+    Logger.info("Connecting with Ethernet...");
+    ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+    // ETH.started
+  }
 }
 
 void EthernetConnection_::disconnect() {

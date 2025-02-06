@@ -6,7 +6,8 @@
 
 // Тип соединения
 enum class ConnectionMode { WIFI, ETH };
-const ConnectionMode CONNECTION_MODE = ConnectionMode::ETH;
+// const ConnectionMode CONNECTION_MODE = ConnectionMode::ETH;
+const ConnectionMode CONNECTION_MODE = ConnectionMode::WIFI;
 
 // Настройки перезагрузки в случае отсутствия соединения
 const bool REBOOT_AFTER_CONNECTION_TIMEOUT_FLAG = true;

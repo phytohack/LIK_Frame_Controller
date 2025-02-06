@@ -62,7 +62,7 @@ void loop()
   if (millis() - timer > 5000)
   {
     timer = millis();
-    WebSocketServerManager.printMainControllerConnectionState();
+    //WebSocketServerManager.printMainControllerConnectionState();
   }
 
   checkMonitor();

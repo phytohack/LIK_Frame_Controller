@@ -27,7 +27,7 @@ public:
         
         // Маршрут для содержимого конкретного лога
         server.on("/logs/", HTTP_GET, handleLogsList); // Для папки /logs/
-        server.on("/logs/*", HTTP_GET, handleLogFile);
+        server.on("/logs/<filepath>", HTTP_GET, handleLogFile);
         
         server.begin();
         Logger.info("HTTP server started.");
@@ -41,7 +41,7 @@ private:
     WebServer server;
 
     // Обработчик для списка логов
-    void handleLogsList() {
+    static void handleLogsList() {
         std::vector<String> files = SPIFFSManager.getFileList("/logs");
         
         String html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Logs</title></head><body>";
@@ -54,38 +54,41 @@ private:
         
         html += "</ul></body></html>";
         
-        server.send(200, "text/html", html);
+        getInstance().server.send(200, "text/html", html);
     }
 
     // Обработчик для содержимого конкретного лога
-    void handleLogFile() {
-        String path = server.uri();
+    static void handleLogFile() {
+        Logger.info("Enter handle Log File");
+        String path = getInstance().server.uri();
         // Ожидаем формат /logs/filename.txt
         if (path.length() <= 6) { // "/logs/" имеет длину 6
-            server.send(400, "text/plain", "Bad Request");
+            getInstance().server.send(400, "text/plain", "Bad Request");
             return;
         }
         
         String fileName = path.substring(6); // Получаем "filename.txt"
-        String filePath = "/log/" + fileName; // Предполагаем, что логи в папке /log/
-        
-        if (!SPIFFSManager.countFiles("/log")) { // Проверка наличия папки
-            server.send(404, "text/plain", "Log directory not found.");
+        String filePath = "/logs/" + fileName; // Предполагаем, что логи в папке /log/
+        Logger.info("Try to find file:" + filePath);
+        if (!SPIFFSManager.countFiles("/logs/")) { // Проверка наличия папки
+            Logger.info("Log directory not found.");
+            getInstance().server.send(404, "text/plain", "Log directory not found.");
             return;
         }
         
         String content = SPIFFSManager.readFile(filePath.c_str());
         if (content.length() == 0) {
-            server.send(404, "text/plain", "File not found or empty.");
+            Logger.info("No content or no file");
+            getInstance().server.send(404, "text/plain", "File not found or empty.");
             return;
         }
-        
+        Logger.info("Making HTML");
         String html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>" + fileName + "</title></head><body>";
         html += "<h1>" + fileName + "</h1><pre>" + content + "</pre>";
         html += "<a href=\"/logs\">Back to Logs List</a>";
         html += "</body></html>";
         
-        server.send(200, "text/html", html);
+        getInstance().server.send(200, "text/html", html);
     }
 };
 

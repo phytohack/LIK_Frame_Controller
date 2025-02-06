@@ -46,6 +46,8 @@ void NetworkManager_::begin() {
   
     if (!_connection->setup()) {
         Logger.error("NetworkManager: setup() failed!");
+    } else {
+        Logger.debug("NetworkManager: setup() success!");
     }
 
     _connect();
