@@ -48,12 +48,12 @@ void WebSocketServerManager_::begin() {
 
 void WebSocketServerManager_::disconnectClient() {
   webSocket.disconnect(0);
-  Serial.println("Client disconnected successfully!");
+  Logger.debug("Client disconnected successfully!");
 }
 
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
-    Logger.debug("! -- MAIN CONTROLLER NOT CONNECTED -- !");
+    Logger.warn("! -- MAIN CONTROLLER NOT CONNECTED -- !");
   }
   Logger.debug("Clients connected: ");
   Logger.debug(String(webSocket.connectedClients()));
@@ -107,7 +107,6 @@ void WebSocketServerManager_::webSocketEvent(uint8_t num, WStype_t type,
       break;
     }
     case WStype_TEXT:
-      //Serial.printf("[%u] Received: %s\n", num, payload);
       if (getInstance().incomeMessageHandler)
         getInstance().incomeMessageHandler(num, String((char *)payload));
       break;

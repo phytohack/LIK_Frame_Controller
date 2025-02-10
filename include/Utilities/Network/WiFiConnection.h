@@ -41,8 +41,8 @@ bool WiFiConnection_::setup() {
 }
 
 void WiFiConnection_::connect() {
-  Serial.println("Connecting to WiFi...");
-  Serial.printf("SSID: %s \n PASS: %s \n", ssid, password);
+  Logger.info("Connecting to WiFi...");
+  Logger.info("SSID: " + String(ssid) + " PASS: " + String(password));
   WiFi.begin(ssid, password);
 }
 

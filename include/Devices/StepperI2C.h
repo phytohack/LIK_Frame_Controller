@@ -6,6 +6,7 @@
 #include "Devices/LowLevel/Multiplexer.h"
 #include "Settings/Settings.h"
 #include "Utilities/Timer.h"
+#include "Utilities/Logger/Logger.h"
 
 class StepperI2C : public GStepper<STEPPER_I2C> {
   using PropertiesChangeCallback = std::function<void(StepperI2C*)>;
@@ -125,7 +126,7 @@ void StepperI2C::_handleBaseLimitSwitcherPushing() {
   _updatePosition();
   setCurrent(0);
   _setState(StepperState::HOLD);
-  Serial.println("Base limit switcher pushed");
+  Logger.info("Base limit switcher pushed");
 }
 
 void StepperI2C::_hardStop() {

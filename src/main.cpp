@@ -2,11 +2,12 @@
 #include <ArduinoJson.h>
 
 #include "Settings/Settings.h"
+#include "Utilities/SPIFFSManager.h"
+#include "Utilities/Logger/Logger.h"
+
 #include "Utilities/Network/NetworkManager.h"
 #include "Utilities/WebSocketServerManager.h"
 #include "Utilities/Clock.h"
-#include "Utilities/Logger/Logger.h"
-#include "Utilities/SPIFFSManager.h"
 #include "Utilities/HttpServerManager.h"
 
 #include "Devices/LowLevel/Multiplexer.h"
@@ -31,8 +32,8 @@ Sensor *_thermalCamSensor;
 void setup()
 {
   Serial.begin(115200);
-  // SPIFFSManager.clearDir("/logs"); // очистка папки с логами
   SPIFFSManager.begin(); // инициализация SPIFFS
+  // SPIFFSManager.clearDir("/logs"); // очистка папки с логами
   Clock.initialize(); // инициализация часов с нулевым временем
   
   // ЛОГЕР

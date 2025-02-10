@@ -4,6 +4,8 @@
 #include <time.h>
 #include <sys/time.h>   // Для функции settimeofday()
 
+#include "Utilities/Logger/Logger.h"
+
 // Класс Clock реализован по схеме singleton – только один экземпляр может существовать.
 class Clock_ {
 // ------------- SINGLETON ---------------
@@ -54,6 +56,7 @@ public:
 
         Serial.print("Default time set to: ");
         Serial.println(getFormattedDateTime());
+
     }
 
     /**

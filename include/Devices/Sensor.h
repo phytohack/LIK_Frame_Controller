@@ -3,6 +3,7 @@
 #include "Settings/Settings.h"
 #include "Devices/LowLevel/Multiplexer.h"
 
+#include "Utilities/Logger/Logger.h"
 
 class Sensor {
     using StateChangeCallback = std::function<void(Sensor*)>;
@@ -21,18 +22,14 @@ class Sensor {
     public:
     void turnOn() {
         if (_state == SensorState::OFF) {
-            Serial.print("Set pin ");
-            Serial.print(_pin);
-            Serial.println(" to LOW");
+            Logger.info("Set pin " + String(_pin) + " to LOW");
             _mux->digitalWrite(_pin, LOW);
             setState(SensorState::ON);
         }
     }
     void turnOff() {
         if (_state == SensorState::ON) {
-            Serial.print("Set pin ");
-            Serial.print(_pin);
-            Serial.println(" to HIGH");
+            Logger.info("Set pin " + String(_pin) + " to HIGH");
             _mux->digitalWrite(_pin, HIGH);
             setState(SensorState::OFF);
         }
