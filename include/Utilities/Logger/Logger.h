@@ -4,9 +4,11 @@
 
 #include "Settings/Logger.h"
 #include "Utilities/Logger/ILogHandler.h"
-
 #include "Utilities/Logger/SerialLogHandler.h"
-#include "Utilities/Logger/SpiffsLogHandler.h"
+#include "Utilities/Logger/SPIFFSLogHandler.h"
+
+#include "Utilities/Clock.h"
+
 /*
 Менеджер логирования.
 Управляет "синками" логов ILogHandlers (Serial, SD, WiFi, etc).
@@ -30,11 +32,11 @@ private:
 public:
   void setup()
   {
-  SerialLogHandler* serialHandler = new SerialLogHandler(LogLevel::DEBUG);
-  SpiffsLogHandler* spiffsHandler = new SpiffsLogHandler(LogLevel::ERROR);
+    SerialLogHandler* serialHandler = new SerialLogHandler(LogLevel::DEBUG);
+    SpiffsLogHandler* spiffsHandler = new SpiffsLogHandler(LogLevel::ERROR);
 
-  addHandler(serialHandler);
-  addHandler(spiffsHandler);
+    addHandler(serialHandler);
+    addHandler(spiffsHandler);
   }
 
   // Добавить новый обработчик

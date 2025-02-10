@@ -5,15 +5,27 @@
 
 class ILogHandler {
 public:
+    ILogHandler() {}
+    ILogHandler(LogLevel minLevel) : _minLevel(minLevel) {}
+
     virtual ~ILogHandler() {}
 
     // Устанавливаем минимум, с какого уровня обрабатывать
-    virtual void setMinLevel(LogLevel level) { _minLevel = level; }
-    virtual LogLevel getMinLevel() { return _minLevel; }
+    void setMinLevel(LogLevel level) { _minLevel = level; }
+    LogLevel getMinLevel() { return _minLevel; }
 
-    // Собственно метод для приёма сообщений
-    // virtual void logMessage(LogLevel level, const char* message) = 0;
-    virtual void logMessage(LogLevel level, String message) = 0;
+    void logMessage(LogLevel level, const String& message) {
+        // Проверяем, стоит ли выводить этот уровень
+        if (static_cast<int>(level) <= static_cast<int>(_minLevel)) {
+            // Вызываем специфичный метод
+            _logMessageImpl(level, message);
+        }
+    }
+
 protected:
     LogLevel _minLevel = LogLevel::DEBUG;
+
+    // Чисто виртуальный метод для конкретной реализации в наследниках.
+    // Он вызовется только если проверка уровня прошла успешно.
+    virtual void _logMessageImpl(LogLevel level, const String& message) = 0;
 };

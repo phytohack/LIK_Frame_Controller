@@ -31,21 +31,30 @@ Sensor *_thermalCamSensor;
 void setup()
 {
   Serial.begin(115200);
+  // SPIFFSManager.clearDir("/logs"); // очистка папки с логами
   SPIFFSManager.begin(); // инициализация SPIFFS
   Clock.initialize(); // инициализация часов с нулевым временем
   
   // ЛОГЕР
   Logger.setup(); // добавляются Serial и SPIFFS логгеры
-  Logger.debug("This is a debug message.");
-  Logger.info("This is an info message.");
-  Logger.warn("This is a warning message.");
-  Logger.error("This is an error message.");
-  Logger.fatal("This is a fatal message.");
+  Logger.debug("This is a debug message in setup, before NetworkManager.begin() and Clock.synchronize().");
+  Logger.info("This is an info message in setup before NetworkManager.begin() and Clock.synchronize().");
+  Logger.warn("This is a warning message in setup before NetworkManager.begin() and Clock.synchronize().");
+  Logger.error("This is an error message in setup before NetworkManager.begin() and Clock.synchronize().");
+  Logger.fatal("This is a fatal message in setup before NetworkManager.begin() and Clock.synchronize().");
+
 
   // Тип подключения (WiFi или ETH) - в Settings/NetworkSettings.h
   NetworkManager.begin();
   Clock.synchronize(); // синхронизация времени с NTP сервером
   HttpServerManager.begin(); // запуск HTTP сервера
+
+  Logger.debug("This is a debug message in setup, after NetworkManager.begin() and Clock.synchronize().");
+  Logger.info("This is an info message in setup after NetworkManager.begin() and Clock.synchronize().");
+  Logger.warn("This is a warning message in setup after NetworkManager.begin() and Clock.synchronize().");
+  Logger.error("This is an error message in setup after NetworkManager.begin() and Clock.synchronize().");
+  Logger.fatal("This is a fatal message in setup after NetworkManager.begin() and Clock.synchronize().");
+
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
 
@@ -92,6 +101,7 @@ void checkMonitor()
     else if (input.startsWith("thermal cam off")) _thermalCamSensor->turnOff();
     else if (input.startsWith("client disconnect")) WebSocketServerManager.disconnectClient();
     else if (input.startsWith("reboot")) ESP.restart();
+    else if (input.startsWith("clear logs")) SPIFFSManager.clearDir("/logs");
   }
 }
 
