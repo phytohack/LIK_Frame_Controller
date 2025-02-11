@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm> // для std::sort
 
-#include "Utilities/Logger/Logger.h"
+// #include "Utilities/Logger/Logger.h"
 
 class SPIFFSManager_ {
 

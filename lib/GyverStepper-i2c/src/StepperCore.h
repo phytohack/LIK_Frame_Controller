@@ -41,6 +41,7 @@
 #include "GStypes.h"
 // #include <PCF8575.h>
 #include <PCF8574.h>
+#include "Utilities/Logger/Logger.h"
 
 #ifndef DRIVER_STEP_TIME
 #define DRIVER_STEP_TIME 4
@@ -179,7 +180,7 @@ private:
 	void configurePin_i2c(int num, uint8_t pin) {
 		_i2c_address->pinMode(pin, OUTPUT);
 		_pins[num] = pin;
-		Serial.println("pinMode " + String(pin) + " OUTPUT");
+		Logger.debug("I2C PIN " + String(pin) + " MODE: OUTPUT");
 	}
 	
 	void setPin_i2c(int num, bool state) {

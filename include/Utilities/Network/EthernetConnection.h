@@ -42,7 +42,6 @@ private:
 private:
     static void _ethEventHandler(WiFiEvent_t event);
     bool _ethConnected = false;
-
 };
 
 bool EthernetConnection_::setup() {
@@ -50,32 +49,43 @@ bool EthernetConnection_::setup() {
   WiFi.onEvent(_ethEventHandler); 
 
   // 2. Сброс чипа (NRST) (https://www.kincony.com/how-to-programming.html)
-  pinMode(NRST, OUTPUT);
-  digitalWrite(NRST, 0); delay(200);
-  digitalWrite(NRST, 1); delay(200);
-  digitalWrite(NRST, 0); delay(200);
+  pinMode(NRST, OUTPUT); delay(200);
+//   digitalWrite(NRST, 0); delay(200);
+//   digitalWrite(NRST, 1); delay(200);
+//   digitalWrite(NRST, 0); delay(200);
   digitalWrite(NRST, 1);
+  delay(200);
   
   // 3. Запускаем ETH
   bool ethBegin = ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
   delay(1000);
-  Logger.info("ETHERNET BEGIN RESULT : ");
-  Logger.info(String(ethBegin));
+  Logger.info("ETHERNET BEGIN RESULT : " + String(ethBegin));
 
   if (!ETH.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
     Logger.warn("ETH Static IP Failed to configure");
   } else {
     Logger.info("ETH Static IP Configured Successfully");
   }
+
+  while (!ETH.linkUp()) {
+    delay(1000);
+    Logger.debug("Waiting For Ethernet Link...");
+  }
+  Logger.info("Connected via Ethernet");
+  Logger.info("IP address: " + ETH.localIP().toString());
+
  return true;
 }
 
 void EthernetConnection_::connect() {
   if (!isConnected()) {
-    Logger.info("Connecting with Ethernet...");
-    ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
-    // ETH.started
-  }
+    Logger.info("Ethernet connect() called but ETH.begin() already done. Doing nothing.");
+    // Или если хочется принудительно "оживить" PHY-питание:
+    // pinMode(ETH_POWER_PIN, OUTPUT);
+    // digitalWrite(ETH_POWER_PIN, 1);
+    // Logger.info("Connecting with Ethernet...");
+    // ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+    }
 }
 
 void EthernetConnection_::disconnect() {
@@ -88,7 +98,7 @@ IPAddress EthernetConnection_::getIP() {
 }
 
 bool EthernetConnection_::isConnected() {
-    _ethConnected = ETH.linkUp();
+    // _ethConnected = ETH.linkUp();
     return _ethConnected;
 }
 
@@ -98,11 +108,11 @@ void EthernetConnection_::_ethEventHandler(WiFiEvent_t event) {
     String log_msg = "";
     switch (event) {
         case SYSTEM_EVENT_ETH_START:
-            Logger.info("ETH Started");
+            Logger.info("***EthernetConnection_::_ethEventHandler***  ETH Started");
             ETH.setHostname("esp32-ethernet");
             break;
         case SYSTEM_EVENT_ETH_CONNECTED:
-            Logger.info("ETH Connected");
+            Logger.info("***EthernetConnection_::_ethEventHandler***  ETH Connected");
             break;
         case SYSTEM_EVENT_ETH_GOT_IP:
             log_msg = "ETH MAC: " + String(ETH.macAddress()) + ", IPv4: " + String(ETH.localIP());
@@ -115,14 +125,18 @@ void EthernetConnection_::_ethEventHandler(WiFiEvent_t event) {
             EthernetConnection_::getInstance()._ethConnected = true;
             break;
         case SYSTEM_EVENT_ETH_DISCONNECTED:
-            Logger.warn("ETH Disconnected");
+            Logger.warn("***EthernetConnection_::_ethEventHandler***  ETH Disconnected");
             EthernetConnection_::getInstance()._ethConnected = false;
             break;
         case SYSTEM_EVENT_ETH_STOP:
-            Logger.warn("ETH Stopped");
+            Logger.warn("***EthernetConnection_::_ethEventHandler***  ETH Stopped");
             EthernetConnection_::getInstance()._ethConnected = false;
             break;
         default:
+            // Logger.warn("***EthernetConnection_::_ethEventHandler***  Unknown event: " + String(event));
+            // Serial.println("SYSTEM_EVENT_ETH_CONNECTED" + String(SYSTEM_EVENT_ETH_CONNECTED));
+            // Serial.println("SYSTEM_EVENT_ETH_GOT_IP" + String(SYSTEM_EVENT_ETH_GOT_IP));
+            // Serial.println("SYSTEM_EVENT_ETH_START" + String(SYSTEM_EVENT_ETH_START));
             break;
     }
 }

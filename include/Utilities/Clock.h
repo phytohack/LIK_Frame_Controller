@@ -33,7 +33,7 @@ private:
      * @param second Секунды (по умолчанию 0)
      */
 public:    
-    void initialize(int year = 2025, int month = 2, int day = 1, int hour = 0, int minute = 0, int second = 0) {
+    void initialize(int year = 2025, int month = 1, int day = 1, int hour = 0, int minute = 0, int second = 0) {
         // Заполняем структуру tm значениями по умолчанию.
         struct tm t = {0};
         t.tm_year = year - 1900; // В структуре tm год считается от 1900.
