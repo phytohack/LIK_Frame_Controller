@@ -30,16 +30,10 @@ public:
     bool appendFile(const char* path, const char* message) { return _writeFile(path, message, true); }; // Добавить в файл
     bool writeFile(const char* path, const char* message) { return _writeFile(path, message, false); }; // Записать в файл (перезаписать)
     String readFile(const char* path);
-    
-     // убедиться, что достаточно места в SPIFFS для записи файла и удалить старые файлы, если необходимо
-    bool ensureFreeSpace(const char* folderPath, size_t requiredSize);
-
-    std::vector<String> getFileList(const char* path);
-    
-    // int countFiles(const char* path);
-    
-    bool clearSPIFFS();  // Удаляет все файлы из SPIFFS ** не работает
+    bool ensureFreeSpace(const char* folderPath, size_t requiredSize); // убедиться, что достаточно места в SPIFFS для записи файла и удалить старые файлы, если места не хватает
+    std::vector<String> listFiles(const char* path);
     bool clearDir(const char* dirPath);
+    bool deleteFile(const char* path);
 
 
 private:
@@ -109,7 +103,7 @@ bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize
         return true;
     
     // Получаем список файлов из указанной папки
-    std::vector<String> fileList = getFileList(folderPath);
+    std::vector<String> fileList = listFiles(folderPath);
     if (fileList.empty()) {
         Serial.println("No files to remove in the folder: " + String(folderPath));
         return false;
@@ -131,11 +125,16 @@ bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize
             break;
     }
 
+    if (freeSpace < requiredSize) {
+        Serial.println("Unable to free required space in SPIFFS");
+        return false;
+    }
+
     return true;
 }
 
 
-std::vector<String> SPIFFSManager_::getFileList(const char* path) {
+std::vector<String> SPIFFSManager_::listFiles(const char* path) {
     std::vector<String> fileList;
     File dir = SPIFFS.open(path, "r");
     if (!dir || !dir.isDirectory()) {
@@ -240,24 +239,6 @@ bool SPIFFSManager_::clearDirectory(const char* path) {
     return success;
 }
 
-bool SPIFFSManager_::clearSPIFFS() {
-    Serial.println("Clearing SPIFFS...");
-    bool success = clearDirectory("/");
-    
-    // Сбрасываем кеш, так как содержимое изменилось
-    // _isCacheValid = false;
-    // _lastCountedPath = "";
-    // _lastFileCount = 0;
-    
-    if (success) {
-        Serial.println("SPIFFS cleared successfully.");
-    } else {
-        Serial.println("Error while clearing SPIFFS.");
-    }
-    return success;
-}
-
-
 bool SPIFFSManager_::clearDir(const char* dirPath) {
     bool success = true;
 
@@ -296,6 +277,11 @@ bool SPIFFSManager_::clearDir(const char* dirPath) {
     }
     dir.close();
     return success;
+}
+
+bool SPIFFSManager_::deleteFile(const char* path) {
+    Serial.printf("Deleting file: %s\n", path);
+    return SPIFFS.remove(path);
 }
 
 
