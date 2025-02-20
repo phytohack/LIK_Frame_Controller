@@ -29,6 +29,8 @@ void setupSensors();
 StepperI2C *_thermalCamStepper;
 Sensor *_thermalCamSensor;
 
+Timer debugSignalTimer(60000);
+
 void setup()
 {
   Serial.begin(115200);
@@ -43,6 +45,7 @@ void setup()
   NetworkManager.begin();
   Clock.synchronize(); // синхронизация времени с NTP сервером
   HttpServerManager.begin(); // запуск HTTP сервера
+  WebSocketServerManager.begin();
 
   // цепочка обязанностей
   WebSocketServerManager.setIncomeMessageHandler(MessageHandler.handleIncomeMessageToServer);
@@ -52,15 +55,16 @@ void setup()
   // MessageHandler.getInstance().setThermalStepper(_thermalCamStepper);
   MessageHandler.setThermalCamStepper(_thermalCamStepper);
   MessageHandler.setThermalCamSensor(_thermalCamSensor);
+
+  debugSignalTimer.startTimer();
 }
 
-long timer = 0;
 void loop()
 {
-  if (millis() - timer > 5000)
+  if (debugSignalTimer.isExpired())
   {
-    timer = millis();
-    //WebSocketServerManager.printMainControllerConnectionState();
+    debugSignalTimer.startTimer();
+    WebSocketServerManager.printMainControllerConnectionState();
   }
 
   checkMonitor();

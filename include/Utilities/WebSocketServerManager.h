@@ -54,9 +54,9 @@ void WebSocketServerManager_::disconnectClient() {
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
     Logger.warn("! -- MAIN CONTROLLER NOT CONNECTED -- !");
+  } else {
+    Logger.debug("Clients connected: " + String(webSocket.connectedClients()));
   }
-  Logger.debug("Clients connected: ");
-  Logger.debug(String(webSocket.connectedClients()));
 }
 
 void WebSocketServerManager_::setMainControllerClientNum(int num) {
