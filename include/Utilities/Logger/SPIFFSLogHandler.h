@@ -10,7 +10,7 @@
 class SpiffsLogHandler : public IFileLogHandler {
 public:
     SpiffsLogHandler(LogLevel minLevel = LogLevel::ERROR)
-    : IFileLogHandler(minLevel) {}
+    : IFileLogHandler("SPIFFS", "SPIFFS", minLevel) {}
 
     // Реализация метода получения списка лог-файлов из директории /logs
     std::vector<String> listLogFiles() override {

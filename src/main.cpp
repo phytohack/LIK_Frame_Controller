@@ -8,7 +8,7 @@
 #include "Utilities/Network/NetworkManager.h"
 #include "Utilities/WebSocketServerManager.h"
 #include "Utilities/Clock.h"
-#include "Utilities/HttpServerManager.h"
+#include "Utilities/WebInterface/HttpServerManager.h"
 
 #include "Devices/LowLevel/Multiplexer.h"
 #include "Devices/Abstract/MultiplexerFactory.h"
@@ -66,7 +66,7 @@ void loop()
   checkMonitor();
   NetworkManager.maintainConnection(); // поддержание соединения
   WebSocketServerManager.loop();
-  HttpServerManager.handleClient();
+  // HttpServerManager.handleClient();
 }
 
 void checkMonitor()

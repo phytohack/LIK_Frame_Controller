@@ -9,8 +9,19 @@ class IFileLogHandler : public ILogHandler {
 public:
     IFileLogHandler(LogLevel minLevel = LogLevel::ERROR)
         : ILogHandler(minLevel) {}
+    
+    IFileLogHandler(const String& id, const String& displayName, LogLevel minLevel = LogLevel::ERROR)
+        : ILogHandler(minLevel), _id(id), _displayName(displayName) {}
 
     virtual ~IFileLogHandler() {}
+
+    // Переопределение для указания, что это файловый лог-обработчик. Тогда можно получать списки файлов и их содержимое
+    bool isFileLogHandler() const override { return true; }
+   
+
+    // Методы для получения информации о логе - для отображения в web-интерфейсе
+    String getId() { return _id; }; // Возвращает уникальный идентификатор лога (например, "SPIFFS" или "SD")
+    String getDisplayName() { return _displayName; }; // Возвращает отображаемое имя лога (например, "Файловая система SPIFFS" или "SD-карта")
 
     // Методы для чтения логов
     // Возвращает список файлов логов (например, файлы в директории /logs)
@@ -25,6 +36,8 @@ public:
     virtual bool deleteLogFiles(const std::vector<String>& fileNames) = 0;
     // Удаляет все лог-файлы (например, очищает директорию /logs)
     virtual bool deleteAllLogFiles() = 0;
+
+    
 
 protected:
     // Шаблонный метод логирования: генерирует имя файла и вызывает запись сообщения
@@ -48,10 +61,12 @@ protected:
     virtual bool _fileExists(const char* path) = 0;
     virtual String _readFromFile(const char* path) = 0;
     virtual bool _writeFile(const char* path, const String& data) = 0;
-
-private:
+    
     String _lastDate = "";
     uint16_t _lastFileId = 0;
+
+    String _id = "";
+    String _displayName = "";
 };
 
 String IFileLogHandler::_generateLogFileName() {
