@@ -8,7 +8,7 @@
 #include "Utilities/Network/NetworkManager.h"
 #include "Utilities/WebSocketServerManager.h"
 #include "Utilities/Clock.h"
-#include "Utilities/HttpServerManager.h"
+#include "Utilities/WebInterface/HttpServerManager.h"
 
 #include "Devices/LowLevel/Multiplexer.h"
 #include "Devices/Abstract/MultiplexerFactory.h"
@@ -39,7 +39,7 @@ void setup()
   Clock.initialize(); // инициализация часов с нулевым временем
   
   // ЛОГЕР
-  Logger.setup(); // добавляются Serial и SPIFFS логгеры
+  Logger.setup(); // внутри - добавляются Serial и SPIFFS логгеры
 
   // Тип подключения (WiFi или ETH) - в Settings/NetworkSettings.h
   NetworkManager.begin();
@@ -70,7 +70,7 @@ void loop()
   checkMonitor();
   NetworkManager.maintainConnection(); // поддержание соединения
   WebSocketServerManager.loop();
-  HttpServerManager.handleClient();
+  // HttpServerManager.handleClient();
 }
 
 void checkMonitor()

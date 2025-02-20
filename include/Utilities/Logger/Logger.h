@@ -44,6 +44,11 @@ public:
       _handlers.push_back(handler);
   }
 
+  // Вернуть все обработчики
+  std::vector<ILogHandler*> getHandlers() {
+      return _handlers;
+  }
+
   void log(LogLevel level, const char* message) {
       // Проходим по всем обработчикам и шлём
       for (auto handler : _handlers) {

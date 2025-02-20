@@ -22,6 +22,10 @@ public:
         }
     }
 
+    // Метод для проверки, является ли обработчик файловым логом.
+    virtual bool isFileLogHandler() const { return false; }
+    
+
 protected:
     LogLevel _minLevel = LogLevel::DEBUG;
 

@@ -74,7 +74,7 @@ private:
 
     // Обработчик для списка логов
     static void handleLogsList() {
-        std::vector<String> files = SPIFFSManager.getFileList("/logs");
+        std::vector<String> files = SPIFFSManager.listFiles("/logs");
         std::sort(files.begin(), files.end());
         
         // Сортируем список файлов по алфавиту
