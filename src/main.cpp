@@ -35,11 +35,10 @@ void setup()
 {
   Serial.begin(115200);
   SPIFFSManager.begin(); // инициализация SPIFFS
-  // SPIFFSManager.clearDir("/logs"); // очистка папки с логами
   Clock.initialize(); // инициализация часов с нулевым временем
   
   // ЛОГЕР
-  Logger.setup(); // внутри - добавляются Serial и SPIFFS логгеры
+  Logger.setup(); // внутри - добавляются методы логирования с соотв. уровнями
 
   // Тип подключения (WiFi или ETH) - в Settings/NetworkSettings.h
   NetworkManager.begin();

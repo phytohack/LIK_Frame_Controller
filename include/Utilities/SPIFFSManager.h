@@ -117,31 +117,31 @@ String SPIFFSManager_::readFile(const char* path) {
     // }
 
     // Выводим размер файла
-    Serial.println();
-    size_t fsize = file.size();
-    Serial.print("Reading file: ");
-    Serial.print(path);
-    Serial.print("  Size: ");
-    Serial.println(fsize);
+    // Serial.println();
+    // size_t fsize = file.size();
+    // Serial.print("Reading file: ");
+    // Serial.print(path);
+    // Serial.print("  Size: ");
+    // Serial.println(fsize);
     
     // Попробуем сначала считать весь файл встроенным методом
     String content = file.readString();
-    Serial.print("Read string length: ");
-    Serial.println(content.length());
-    Serial.println();
+    // Serial.print("Read string length: ");
+    // Serial.println(content.length());
+    // Serial.println();
 
     file.close();
     return content;
 }
 
 bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize) {
-    Serial.println("Ensuring free space in LittleFS...");
+    // Serial.println("Ensuring free space in LittleFS...");
     uint32_t freeSpace = LittleFS.totalBytes() - LittleFS.usedBytes();
     const size_t safetyMargin = 4096; // Безопасный запас в 4 КБ
 
     // Если свободного места достаточно – выходим
     if (freeSpace >= (requiredSize + safetyMargin)) {
-        Serial.println("[OK] Ensure Enough Free Space: Need " + String(requiredSize) + " bytes, have " + String(freeSpace) + " bytes");
+        // Serial.println("[OK] Ensure Enough Free Space: Need " + String(requiredSize) + " bytes, have " + String(freeSpace) + " bytes");
         return true;
     }
     Serial.println("[NOT OK] Ensure Enough Free Space: Need " + String(requiredSize) + " bytes, have " + String(freeSpace) + " bytes");
