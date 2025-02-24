@@ -5,6 +5,8 @@
 #include "Utilities/Logger/Logger.h"
 #include "Utilities/Logger/IFileLogHandler.h"
 
+#include "Utilities/WebInterface/Pages/BasePage.h"  
+
 class LogContentPage {
 public:
     static void handle(AsyncWebServerRequest *request);
@@ -33,14 +35,23 @@ void LogContentPage::handle(AsyncWebServerRequest *request) {
         return;
     }
     
+    // Большие файлы через String не передаются!! (макс 64 Кб)
+    // Поэтому пока пока передается потоком, без красоты (последняя строка метода)
+    
     // Чтение содержимого файла
-    String content = fileHandler->readLogFile(fileName);
+    // String content = fileHandler->readLogFile(fileName);
+    // if (content == "") {
+    //     request->send(404, "text/plain", "File is empty or not found");
+    //     return;
+    // }
+    // Serial.println("CONTENT::::: Read content length: " + String(content.length()));
     
-    String html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Лог: " + fileName + "</title></head><body>";
-    html += "<h1>Лог файл: " + fileName + "</h1>";
-    html += "<pre>" + content + "</pre>";
-    html += "<a href='/logs?handler=" + handlerId + "'><button>Назад</button></a>";
-    html += "</body></html>";
+    // String html = BasePage::getHeader("Лог: " + fileName);
+    // html += "<h3>Log file: " + fileName + "</h3>";
+    // html += "<pre>" + content + "</pre>";
+    // html += "<a href='/logs?handler=" + handlerId + "'><button>Назад</button></a>";
+    // html += BasePage::getFooter();
     
-    request->send(200, "text/html", html);
+    // request->send(200, "text/html", html);
+    request->send(LittleFS, "/logs/" + fileName, "text/plain");
 }

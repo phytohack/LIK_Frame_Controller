@@ -4,8 +4,6 @@
 #include <time.h>
 #include <sys/time.h>   // Для функции settimeofday()
 
-#include "Utilities/Logger/Logger.h"
-
 // Класс Clock реализован по схеме singleton – только один экземпляр может существовать.
 class Clock_ {
 // ------------- SINGLETON ---------------
@@ -33,7 +31,7 @@ private:
      * @param second Секунды (по умолчанию 0)
      */
 public:    
-    void initialize(int year = 2025, int month = 1, int day = 1, int hour = 0, int minute = 0, int second = 0) {
+    void initialize(int year = 2025, int month = 2, int day = 1, int hour = 0, int minute = 0, int second = 0) {
         // Заполняем структуру tm значениями по умолчанию.
         struct tm t = {0};
         t.tm_year = year - 1900; // В структуре tm год считается от 1900.
@@ -56,7 +54,6 @@ public:
 
         Serial.print("Default time set to: ");
         Serial.println(getFormattedDateTime());
-
     }
 
     /**
@@ -82,14 +79,12 @@ public:
 
         // Ждем синхронизации: в этом примере считается, что если время (now) стало больше _defaultTime,
         // то NTP-сервер вернул корректное время.
-        // while ((now = time(nullptr)) >= _defaultTime && (millis() - start < timeout_ms)) {
         while ((now = time(nullptr)) <= _defaultTime && (millis() - start < timeout_ms)) {
             Serial.print(".");
             delay(500);
         }
 
         // Если время так и не изменилось, считаем, что синхронизация не удалась.
-        // if (now >= _defaultTime) {
         if (now <= _defaultTime) {
             Serial.println("\nTime synchronization failed. Continuing with default time.");
         } else {
@@ -165,7 +160,9 @@ private:
     }
 };
 
-
+// Если удобно использовать глобальный объект, можно создать ссылку на единственный экземпляр:
+// extern Clock& Clock;
+// Clock& Clock = Clock::getInstance();
 // ------------- SINGLETON ---------------
 extern Clock_ &Clock;
 Clock_ &Clock = Clock.getInstance();

@@ -4,6 +4,8 @@
 #include "Utilities/Logger/Logger.h"
 #include "Utilities/Logger/IFileLogHandler.h"
 
+#include "Utilities/WebInterface/Pages/BasePage.h"
+
 class LogFilesPage {
 public:
     static void handle(AsyncWebServerRequest *request);
@@ -37,10 +39,28 @@ void LogFilesPage::handle(AsyncWebServerRequest *request) {
     // Получаем список файлов
     std::vector<String> files = fileHandler->listLogFiles();
     
-    String html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Логи - " + fileHandler->getDisplayName() + "</title></head><body>";
-    html += "<h1>" + fileHandler->getDisplayName() + "</h1>";
+    // Вычисление памяти и процентов
+    uint32_t totalSpace = fileHandler->getTotalSpace();
+    uint32_t usedSpace = fileHandler->getUsedSpace();
+    float usedPercent = (totalSpace > 0) ? (100.0 * usedSpace / totalSpace) : 0.0;
+    // Форматируем числа для отображения в килобайтах
+    String usedKB = String(usedSpace / 1024);
+    String totalKB = String(totalSpace / 1024);
+
+    // Header
+    String html = BasePage::getHeader("Логи - " + fileHandler->getDisplayName());    
+    html += "<h3> Logs " + fileHandler->getDisplayName() + "</h3>";
+
+    // Информация о памяти
+    // Контейнер прогресс-бара
+    html += "<div style='width:100%; background:#eee; border:1px solid #ccc; border-radius:5px; height:25px; margin-bottom:15px;'>";
+    // Заполненная часть прогресс-бара
+    html += "<div style='width:" + String(usedPercent) + "%; background:#337ab7; height:100%; border-radius:5px;'></div>";
+    html += "</div>";
+    html += "<p style='text-align:right; font-style:italic;'>" + usedKB + " KB использовано из " + totalKB + " KB</p>";
+
+    // Список файлов
     html += "<form method='POST' action='/logs?handler=" + handlerId + "'>";
-    
     html += "<ul>";
     for (const auto &fileName : files) {
         // Каждый файл – это ссылка для просмотра и чекбокс для удаления
@@ -53,18 +73,21 @@ void LogFilesPage::handle(AsyncWebServerRequest *request) {
     
     html += "<button type='submit' name='action' value='delete'>Удалить выбранные</button> ";
     html += "<button type='submit' name='action' value='deleteAll'>Удалить все</button>";
+
     html += "</form>";
     
     html += "<a href='/logs'><button>Назад</button></a>";
-    html += "</body></html>";
+    html += BasePage::getFooter();
     
     request->send(200, "text/html", html);
 }
 
 void LogFilesPage::handleDelete(AsyncWebServerRequest *request) {
     // Удаление выбранных файлов
-    if (!request->hasParam("handler", true)) return;
-    String handlerId = request->getParam("handler", true)->value();
+    // if (!request->hasParam("handler", true)) return;
+    if (!request->hasParam("handler")) return;
+    // String handlerId = request->getParam("handler", true)->value();
+    String handlerId = request->getParam("handler")->value();
     
     IFileLogHandler* fileHandler = nullptr;
     auto handlers = Logger.getHandlers();
@@ -92,8 +115,8 @@ void LogFilesPage::handleDelete(AsyncWebServerRequest *request) {
 
 void LogFilesPage::handleDeleteAll(AsyncWebServerRequest *request) {
     // Удаление всех файлов
-    if (!request->hasParam("handler", true)) return;
-    String handlerId = request->getParam("handler", true)->value();
+    if (!request->hasParam("handler")) return;
+    String handlerId = request->getParam("handler")->value();
     
     IFileLogHandler* fileHandler = nullptr;
     auto handlers = Logger.getHandlers();

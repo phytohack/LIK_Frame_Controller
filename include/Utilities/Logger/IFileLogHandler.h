@@ -37,6 +37,11 @@ public:
     // Удаляет все лог-файлы (например, очищает директорию /logs)
     virtual bool deleteAllLogFiles() = 0;
 
+    virtual uint32_t getTotalSpace() const = 0;
+    virtual uint32_t getFreeSpace() const = 0;
+    virtual uint32_t getUsedSpace() const = 0;
+
+
     
 
 protected:
@@ -75,7 +80,7 @@ String IFileLogHandler::_generateLogFileName() {
         _lastDate = currentDate;
         _lastFileId = _getNextLogId();
     }
-    char idStr[10];
+    char idStr[10]; 
     sprintf(idStr, "%05d", _lastFileId);
     return "/logs/" + String(idStr) + " - " + currentDate + ".txt";
 }

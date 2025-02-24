@@ -1,11 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
-#include <LittleFS.h>
+#include <SPIFFS.h>
 #include <vector>
 #include <algorithm> // для std::sort
-
-// #include "Utilities/Logger/Logger.h"
 
 class SPIFFSManager_ {
 
@@ -26,7 +24,7 @@ private:
 
 public:
     bool begin();
-    bool exists(const char* path) { return LittleFS.exists(path);}
+    bool exists(const char* path) { return SPIFFS.exists(path);}
     bool appendFile(const char* path, const char* message) { return _writeFile(path, message, true); }; // Добавить в файл
     bool writeFile(const char* path, const char* message) { return _writeFile(path, message, false); }; // Записать в файл (перезаписать)
     String readFile(const char* path);
@@ -35,9 +33,9 @@ public:
     bool clearDir(const char* dirPath);
     bool deleteFile(const char* path);
 
-    uint32_t getTotalBytes() const { return LittleFS.totalBytes(); }
-    uint32_t getUsedBytes() const { return LittleFS.usedBytes(); }
-    uint32_t getFreeBytes() const { return LittleFS.totalBytes() - LittleFS.usedBytes(); }
+    uint32_t getTotalBytes() const { return SPIFFS.totalBytes(); }
+    uint32_t getUsedBytes() const { return SPIFFS.usedBytes(); }
+    uint32_t getFreeBytes() const { return SPIFFS.totalBytes() - SPIFFS.usedBytes(); }
 
 
 private:
@@ -48,20 +46,11 @@ private:
 };
 
 bool SPIFFSManager_::begin() {
-    if (!LittleFS.begin()){
-        Serial.println("LittleFS mount failed, formatting...");
-        if (LittleFS.format()){
-            Serial.println("LittleFS formatted successfully");
-            if (!LittleFS.begin()){
-                Serial.println("Mounting LittleFS failed after formatting");
-                return false;
-            }
-        } else {
-            Serial.println("LittleFS formatting failed");
-            return false;
-        }
+    if (!SPIFFS.begin(true)) { // Параметр 'true' включает форматирование при ошибке
+        Serial.println("An error has occurred while mounting SPIFFS");
+        return false;
     }
-    Serial.println("LittleFS mounted successfully");
+    Serial.println("SPIFFS mounted successfully");
     return true;
 }
 
@@ -69,22 +58,12 @@ bool SPIFFSManager_::_writeFile(const char* path, const char* message, bool appe
     // Определяем требуемый размер для записи (длина сообщения + небольшой запас)
     size_t requiredSize = strlen(message) + 10;
     // Убеждаемся, что в SPIFFS достаточно места для записи файла и удаляем старые файлы, если необходимо
-    String pathDir = _getDirectoryFromPath(path);
-    if (!ensureFreeSpace(pathDir.c_str(), requiredSize)) {
+    if (!ensureFreeSpace(_getDirectoryFromPath(path).c_str(), requiredSize)) {
         Serial.println("Failed to ensure free space in SPIFFS");
         return false;
     }
 
-    if (!LittleFS.exists(pathDir.c_str())) {
-        if (LittleFS.mkdir(pathDir.c_str())) {
-            Serial.println("Created " + pathDir + " directory");
-        } else {
-            Serial.println("Failed to create " + pathDir + " directory");
-            return false;
-        }
-    }
-
-    File file = LittleFS.open(path, append ? "a" : "w");
+    File file = SPIFFS.open(path, append ? "a" : "w");
     // Открываем файл для записи (добавляем в конец или перезаписываем)
     if (!file) {
         // Если файл не удалось открыть, возвращаем false
@@ -105,46 +84,26 @@ bool SPIFFSManager_::_writeFile(const char* path, const char* message, bool appe
 
 
 String SPIFFSManager_::readFile(const char* path) {
-    File file = LittleFS.open(path, "r");
+    File file = SPIFFS.open(path, "r");
     if (!file) {
         Serial.println("Failed to open file for reading");
         return String();
     }
-    // String content;
-    // content.reserve(file.size());
-    // while (file.available()) {
-    //     content += char(file.read());
-    // }
-
-    // Выводим размер файла
-    Serial.println();
-    size_t fsize = file.size();
-    Serial.print("Reading file: ");
-    Serial.print(path);
-    Serial.print("  Size: ");
-    Serial.println(fsize);
-    
-    // Попробуем сначала считать весь файл встроенным методом
-    String content = file.readString();
-    Serial.print("Read string length: ");
-    Serial.println(content.length());
-    Serial.println();
-
+    String content;
+    while (file.available()) {
+        content += char(file.read());
+    }
     file.close();
     return content;
 }
 
 bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize) {
-    Serial.println("Ensuring free space in LittleFS...");
-    uint32_t freeSpace = LittleFS.totalBytes() - LittleFS.usedBytes();
-    const size_t safetyMargin = 4096; // Безопасный запас в 4 КБ
-
+    Serial.println("ensureFreeSpace: OLD");
+    uint32_t freeSpace = SPIFFS.totalBytes() - SPIFFS.usedBytes();;
+    
     // Если свободного места достаточно – выходим
-    if (freeSpace >= (requiredSize + safetyMargin)) {
-        Serial.println("[OK] Ensure Enough Free Space: Need " + String(requiredSize) + " bytes, have " + String(freeSpace) + " bytes");
+    if (freeSpace >= requiredSize)
         return true;
-    }
-    Serial.println("[NOT OK] Ensure Enough Free Space: Need " + String(requiredSize) + " bytes, have " + String(freeSpace) + " bytes");
     
     // Получаем список файлов из указанной папки
     std::vector<String> fileList = listFiles(folderPath);
@@ -163,13 +122,13 @@ bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize
         if (!filePath.startsWith(folderPath))
             filePath = String(folderPath) + "/" + filePath;
         Serial.printf("Removing file: %s\n", filePath.c_str());
-        LittleFS.remove(filePath.c_str());
-        freeSpace = LittleFS.totalBytes() - LittleFS.usedBytes();
-        if (freeSpace >= (requiredSize + safetyMargin))
+        SPIFFS.remove(filePath.c_str());
+        freeSpace = SPIFFS.totalBytes() - SPIFFS.usedBytes();
+        if (freeSpace >= requiredSize)
             break;
     }
 
-    if (freeSpace < (requiredSize + safetyMargin)) {
+    if (freeSpace < requiredSize) {
         Serial.println("Unable to free required space in SPIFFS");
         return false;
     }
@@ -180,7 +139,7 @@ bool SPIFFSManager_::ensureFreeSpace(const char* folderPath, size_t requiredSize
 
 std::vector<String> SPIFFSManager_::listFiles(const char* path) {
     std::vector<String> fileList;
-    File dir = LittleFS.open(path, "r");
+    File dir = SPIFFS.open(path, "r");
     if (!dir || !dir.isDirectory()) {
         Serial.println("Directory does not exist or is not a directory.");
         return fileList;
@@ -218,7 +177,7 @@ bool SPIFFSManager_::clearDirectory(const char* path) {
     bool success = true;
     
     // Открываем директорию по переданному пути (например, "/" или "/logs")
-    File dir = LittleFS.open(path, "r");
+    File dir = SPIFFS.open(path, "r");
     if (!dir || !dir.isDirectory()) {
         Serial.printf("Directory %s not found or is not a directory.\n", path);
         return false;
@@ -271,7 +230,7 @@ bool SPIFFSManager_::clearDirectory(const char* path) {
             // Обычно папки в SPIFFS являются виртуальными, поэтому удалять саму папку не требуется
         } else {
             // Удаляем файл по сформированному абсолютному пути
-            if (!LittleFS.remove(fullPath.c_str())) {
+            if (!SPIFFS.remove(fullPath.c_str())) {
                 Serial.printf("Failed to remove file: %s\n", fullPath.c_str());
                 success = false;
             } else {
@@ -288,7 +247,7 @@ bool SPIFFSManager_::clearDir(const char* dirPath) {
     bool success = true;
 
     // Открываем папку /logs
-    File dir = LittleFS.open(dirPath, "r");
+    File dir = SPIFFS.open(dirPath, "r");
     if (!dir || !dir.isDirectory()) {
         Serial.printf("Directory %s does not exist or is not a directory.\n", dirPath);
         return false;
@@ -311,7 +270,7 @@ bool SPIFFSManager_::clearDir(const char* dirPath) {
         // Если элемент является файлом, пробуем его удалить
         if (!entry.isDirectory()) {
             Serial.printf("Removing file: %s\n", filePath.c_str());
-            if (!LittleFS.remove(filePath.c_str())) {
+            if (!SPIFFS.remove(filePath.c_str())) {
                 Serial.printf("Failed to remove file: %s\n", filePath.c_str());
                 success = false;
             }
@@ -326,7 +285,7 @@ bool SPIFFSManager_::clearDir(const char* dirPath) {
 
 bool SPIFFSManager_::deleteFile(const char* path) {
     Serial.printf("Deleting file: %s\n", path);
-    return LittleFS.remove(path);
+    return SPIFFS.remove(path);
 }
 
 

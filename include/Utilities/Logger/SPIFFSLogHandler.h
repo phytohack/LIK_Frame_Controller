@@ -19,7 +19,9 @@ public:
 
     // Реализация метода чтения содержимого конкретного лог-файла
     String readLogFile(const String& fileName) override {
-        return SPIFFSManager.readFile(fileName.c_str());
+        String filePath = "/logs/" + fileName;
+        // return SPIFFSManager.readFile(fileName.c_str());
+        return SPIFFSManager.readFile(filePath.c_str());
     }
 
     // Реализация методов удаления логов
@@ -33,7 +35,8 @@ public:
     bool deleteLogFiles(const std::vector<String>& fileNames) override {
         bool allDeleted = true;
         for (const auto& fileName : fileNames) {
-            if (!SPIFFSManager.deleteFile(fileName.c_str())) {
+            String filePath = "/logs/" + fileName;
+            if (!SPIFFSManager.deleteFile(filePath.c_str())) {
                 allDeleted = false;
             }
         }
@@ -42,10 +45,15 @@ public:
 
     // Удаляет все лог-файлы в директории /logs
     bool deleteAllLogFiles() override {
+        Serial.println("Delete all log fies method");
         std::vector<String> files = SPIFFSManager.listFiles("/logs");
         return deleteLogFiles(files);
     }
 
+    // Реализация методов получения памяти для SPIFFS
+    uint32_t getTotalSpace() const override { return SPIFFSManager.getTotalBytes(); }
+    uint32_t getFreeSpace() const override { return SPIFFSManager.getFreeBytes(); }
+    uint32_t getUsedSpace() const override { return SPIFFSManager.getUsedBytes(); }
 
 protected:
     // Записывает сообщение в лог-файл с помощью SPIFFSManager

@@ -38,9 +38,9 @@ void WebServerRouter::setupRoutes() {
     
     // Обработка POST-запросов для удаления файлов
     _server->on("/logs", HTTP_POST, [](AsyncWebServerRequest *request){
-        if (request->hasParam("handler", true)) {
-            String handlerId = request->getParam("handler", true)->value();
-            if (request->hasParam("action", true)) {
+        if (request->hasParam("handler")) {
+            String handlerId = request->getParam("handler")->value();
+            if (request->hasParam("action", true)) { // true - искать в POST параметрах
                 String action = request->getParam("action", true)->value();
                 if (action == "delete") {
                     LogFilesPage::handleDelete(request);
@@ -50,8 +50,8 @@ void WebServerRouter::setupRoutes() {
             }
         }
         // Перенаправляем обратно на страницу со списком файлов
-        if (request->hasParam("handler", true)) {
-            String redirectUrl = "/logs?handler=" + request->getParam("handler", true)->value();
+        if (request->hasParam("handler")) {
+            String redirectUrl = "/logs?handler=" + request->getParam("handler")->value();
             request->redirect(redirectUrl);
         } else {
             request->redirect("/logs");
