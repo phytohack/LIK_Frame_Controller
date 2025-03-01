@@ -15,7 +15,7 @@ public:
     
     Multiplexer* getMultiplexer(int address) {
         if (multiplexers.find(address) == multiplexers.end()) {
-            Logger.debug("Creating new multiplexer with address " + String(address));
+            Logger.info("Creating new multiplexer with address " + String(address));
             multiplexers[address] = new Multiplexer(address, SDA_PIN, SCL_PIN);
         } else {
             Logger.warn("Multiplexer with address " + String(address) + " already exists");

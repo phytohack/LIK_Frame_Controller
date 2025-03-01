@@ -52,17 +52,17 @@ class MessageHandler_ {
 };
 
 void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) {
-  Logger.debug("");
-  Logger.debug("[MAIN CONTROLLER]    --->    [FRAME CONTROLLER]");
-  Logger.debug("----------------------------");
-  Logger.debug(strMsg);
-  Logger.debug("----------------------------");
+  Logger.info("");
+  Logger.info("[MAIN CONTROLLER]    --->    [FRAME CONTROLLER]");
+  Logger.info("----------------------------");
+  Logger.info(strMsg);
+  Logger.info("----------------------------");
 
   IncomeMessage msg = IncomeMessage(strMsg);
 
   if (msg.msgType == IncomeMsgTypeValue::IDENTITY_RESPONSE) {
     if (msg.jsonDoc["role"] == "main_controller") {
-      Logger.debug("Get identity request with role == main_controller");
+      Logger.info("Get identity request with role == main_controller");
       WebSocketServerManager.setMainControllerClientNum(clientNum);
       getInstance().sendStepperPropertiesToMainController(getInstance().thermalCamStepper);
       getInstance().sendSensorStateToMainController(getInstance().thermalCamSensor);
@@ -99,7 +99,7 @@ void MessageHandler_::handleIncomeMessageToServer(int clientNum, String strMsg) 
   }
 
   else {
-    Logger.debug("MessageHandler::HandleIncomeMessage PARSING MESSAGE ERROR");
+    Logger.info("MessageHandler::HandleIncomeMessage PARSING MESSAGE ERROR");
   }
 }
 

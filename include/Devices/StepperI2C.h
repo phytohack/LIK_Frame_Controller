@@ -196,7 +196,7 @@ void StepperI2C::basePositioning() {
 
 void StepperI2C::basePositioning(int speed, int acc) {
   if (_preciseBased) {
-    Logger.debug("No need to Basing - already precise based");
+    Logger.info("No need to Basing - already precise based");
     return;
   }
   
@@ -226,7 +226,7 @@ void StepperI2C::basePositioning(int speed, int acc) {
 
 void StepperI2C::preciseBasePositioning() {
   if (_preciseBased) {
-    Logger.debug("No need to Precise Basing - already precise based");
+    Logger.info("No need to Precise Basing - already precise based");
     return;
   }
   

@@ -48,20 +48,20 @@ void WebSocketServerManager_::begin() {
 
 void WebSocketServerManager_::disconnectClient() {
   webSocket.disconnect(0);
-  Logger.debug("Client disconnected successfully!");
+  Logger.info("Client disconnected successfully!");
 }
 
 void WebSocketServerManager_::printMainControllerConnectionState() {
   if (  getInstance().mainControllerClientNum == -1) {
     Logger.warn("! -- MAIN CONTROLLER NOT CONNECTED -- !");
   } else {
-    Logger.debug("Clients connected: " + String(webSocket.connectedClients()));
+    Logger.info("Clients connected: " + String(webSocket.connectedClients()));
   }
 }
 
 void WebSocketServerManager_::setMainControllerClientNum(int num) {
   getInstance().mainControllerClientNum = num;
-  Logger.debug("MainController connected!");
+  Logger.info("MainController connected!");
 }
 
 void WebSocketServerManager_::setIncomeMessageHandler(
@@ -74,11 +74,11 @@ void WebSocketServerManager_::loop() {
 }
 
 void WebSocketServerManager_::send(uint8_t num, String msg) {
-  Logger.debug("");
-  Logger.debug("[MAIN CONTROLLER]    <---    [FRAME CONTROLLER]");
-  Logger.debug("----------------------------");
-  Logger.debug(msg);
-  Logger.debug("----------------------------");
+  Logger.info("");
+  Logger.info("[MAIN CONTROLLER]    <---    [FRAME CONTROLLER]");
+  Logger.info("----------------------------");
+  Logger.info(msg);
+  Logger.info("----------------------------");
   webSocket.sendTXT(num, msg);
 }
 

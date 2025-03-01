@@ -33,7 +33,7 @@ public:
   void setup()
   {
     SerialLogHandler* serialHandler = new SerialLogHandler(LogLevel::DEBUG);
-    SpiffsLogHandler* spiffsHandler = new SpiffsLogHandler(LogLevel::DEBUG);
+    SpiffsLogHandler* spiffsHandler = new SpiffsLogHandler(LogLevel::INFO);
 
     addHandler(serialHandler);
     addHandler(spiffsHandler);

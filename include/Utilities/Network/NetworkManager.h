@@ -47,7 +47,7 @@ void NetworkManager_::begin() {
     if (!_connection->setup()) {
         Logger.error("NetworkManager: setup() failed!");
     } else {
-        Logger.debug("NetworkManager: setup() success!");
+        Logger.info("NetworkManager: setup() success!");
     }
 
     _connect();
@@ -67,8 +67,8 @@ void NetworkManager_::_connect() {
       Serial.print(".");
     }
 
-    Logger.debug("Network connected!");
-    Logger.debug("IP address: " + _connection->getIP().toString());
+    Logger.info("Network connected!");
+    Logger.info("IP address: " + _connection->getIP().toString());
 }
 
 void NetworkManager_::maintainConnection() { 

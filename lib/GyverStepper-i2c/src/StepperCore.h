@@ -180,7 +180,7 @@ private:
 	void configurePin_i2c(int num, uint8_t pin) {
 		_i2c_address->pinMode(pin, OUTPUT);
 		_pins[num] = pin;
-		Logger.debug("I2C PIN " + String(pin) + " MODE: OUTPUT");
+		Logger.info("I2C PIN " + String(pin) + " MODE: OUTPUT");
 	}
 	
 	void setPin_i2c(int num, bool state) {
