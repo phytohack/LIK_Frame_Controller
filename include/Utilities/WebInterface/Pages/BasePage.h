@@ -4,7 +4,7 @@
 class BasePage {
 public:
     static String getHeader(const String &title) {
-        String header = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>" + title + "</title>";
+        String header = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>[Frame] " + title + "</title>";
         header += "<style>";
         header += "body { font-family: Arial, sans-serif; background-color: #f2f2f2; padding: 20px; }";
         header += "h1 { color: #333; }";
