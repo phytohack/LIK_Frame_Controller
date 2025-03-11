@@ -11,7 +11,7 @@
 enum class IncomeMsgTypeValue { IDENTITY_RESPONSE, DEVICE_COMMAND, DEVICE_STATE_REQUEST, UNKNOWN };
 
 
-String IncomeMessageTypeName(IncomeMsgTypeValue type) {};
+String IncomeMessageTypeName(IncomeMsgTypeValue type) {return "";};
 
 String IncomeMessageTypeNameJSON(IncomeMsgTypeValue type) {
   switch (type) {

@@ -8,8 +8,12 @@
 #include "Utilities/Logger/Logger.h"
 #include "Settings/Settings.h"
 
+
 // --------- Параметры Ethernet (https://www.kincony.com/how-to-programming.html)
 #define ETH_TYPE       ETH_PHY_LAN8720
+#ifdef ETH_CLK_MODE   // Если определено в ETH.h
+  #undef ETH_CLK_MODE // То удалим, чтобы не было ошибки при переопределении
+#endif
 #define ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
 #define ETH_MDC_PIN 23
 #define ETH_MDIO_PIN 18
@@ -107,14 +111,17 @@ bool EthernetConnection_::isConnected() {
 void EthernetConnection_::_ethEventHandler(WiFiEvent_t event) {
     String log_msg = "";
     switch (event) {
-        case SYSTEM_EVENT_ETH_START:
+        // case SYSTEM_EVENT_ETH_START:
+        case ARDUINO_EVENT_ETH_START:
             Logger.info("***EthernetConnection_::_ethEventHandler***  ETH Started");
             ETH.setHostname("esp32-ethernet");
             break;
-        case SYSTEM_EVENT_ETH_CONNECTED:
+        // case SYSTEM_EVENT_ETH_CONNECTED:
+        case ARDUINO_EVENT_ETH_CONNECTED:
             Logger.info("***EthernetConnection_::_ethEventHandler***  ETH Connected");
             break;
-        case SYSTEM_EVENT_ETH_GOT_IP:
+            // case SYSTEM_EVENT_ETH_GOT_IP:
+            case IP_EVENT_ETH_GOT_IP:
             log_msg = "ETH MAC: " + String(ETH.macAddress()) + ", IPv4: " + String(ETH.localIP());
             if (ETH.fullDuplex()) {
                 log_msg += ", FULL_DUPLEX";
@@ -124,14 +131,16 @@ void EthernetConnection_::_ethEventHandler(WiFiEvent_t event) {
             // Обновим флаг в синглтоне
             EthernetConnection_::getInstance()._ethConnected = true;
             break;
-        case SYSTEM_EVENT_ETH_DISCONNECTED:
+        // case SYSTEM_EVENT_ETH_DISCONNECTED:
+        case ARDUINO_EVENT_ETH_DISCONNECTED:
             Logger.warn("***EthernetConnection_::_ethEventHandler***  ETH Disconnected");
             EthernetConnection_::getInstance()._ethConnected = false;
             break;
-        case SYSTEM_EVENT_ETH_STOP:
-            Logger.warn("***EthernetConnection_::_ethEventHandler***  ETH Stopped");
-            EthernetConnection_::getInstance()._ethConnected = false;
-            break;
+        // case SYSTEM_EVENT_ETH_STOP:
+        // case ARDUINO_EVENT_ETH_STOP:
+        //     Logger.warn("***EthernetConnection_::_ethEventHandler***  ETH Stopped");
+        //     EthernetConnection_::getInstance()._ethConnected = false;
+        //     break;
         default:
             // Logger.warn("***EthernetConnection_::_ethEventHandler***  Unknown event: " + String(event));
             // Serial.println("SYSTEM_EVENT_ETH_CONNECTED" + String(SYSTEM_EVENT_ETH_CONNECTED));

@@ -35,15 +35,17 @@ class NetworkManager_ {
 
 
 void NetworkManager_::begin() {
-    if (CONNECTION_MODE == ConnectionMode::WIFI) {
-        _connection = &WiFiConnection; 
-    } else if (CONNECTION_MODE == ConnectionMode::ETH) { 
-        _connection = &EthernetConnection; 
-    } else {
-        Logger.error("NetworkManager: Unknown connection mode!");
-        return;
-    }
-  
+#ifdef CONNECTION_MODE_WIFI
+    _connection = &WiFiConnection; 
+    Logger.info("NetworkManager: Using WiFi connection.");
+#elif defined(CONNECTION_MODE_ETH)
+    _connection = &EthernetConnection; 
+    Logger.info("NetworkManager: Using Ethernet connection.");
+#else
+    Logger.error("NetworkManager: Unknown connection mode!");
+    return;
+#endif
+
     if (!_connection->setup()) {
         Logger.error("NetworkManager: setup() failed!");
     } else {

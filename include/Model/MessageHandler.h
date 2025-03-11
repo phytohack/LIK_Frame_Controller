@@ -10,6 +10,9 @@
 #include "Settings/Settings.h"
 #include "Utilities/WebSocketServerManager.h"
 
+#include "Utilities/Logger/Logger.h"
+
+
 // типа функций, в которые будут передаваться распарсенные команды
 // using ThermalCameraStepperCommandHandler = std::function<void(long)>;
 
@@ -138,6 +141,9 @@ Command *MessageHandler_::createStepperCommand(IncomeMessage msg) {
   
   if (msg.jsonDoc["command"] == StepperCommandTypeJSON(StepperCommandType::STOP))
     return new FrameStepperStopCommand(stepper);
+
+  Logger.error("MessageHandler::createStepperCommand: Unknown command");
+  return nullptr;
 }
 
 void MessageHandler_::sendSensorStateToMainController(Sensor * sensor) {
