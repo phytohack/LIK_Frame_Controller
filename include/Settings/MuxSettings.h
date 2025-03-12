@@ -3,8 +3,15 @@
 
 /////////////////////////////////////////  МУЛЬТИПЛЕКСЕРЫ  /////////////////////////////////////////
 // пины i2c
-#define SDA_PIN 4
-#define SCL_PIN 5
+#ifdef ESP32_S3
+    #define SDA_PIN 9
+    #define SCL_PIN 10
+#else
+    #define SDA_PIN 4
+    #define SCL_PIN 5
+#endif
+
+
 
 // ПРАВИЛЬНЫЕ ПИНЫ С ФОРУМА https://www.kincony.com/forum/showthread.php?tid=1619
 // Картинка платы https://www.kincony.com/esp32-board-16-channel-relay-hardware.html
